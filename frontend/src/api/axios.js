@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://frontend-loyhj3lyh-abdullah-shahalam-devs-projects.vercel.app/login'
+  baseURL: 'https://maintainiq-hackathon.onrender.com/api'
 });
 
 api.interceptors.request.use((config) => {
