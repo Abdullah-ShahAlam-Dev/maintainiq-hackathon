@@ -35,24 +35,14 @@ const issueSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Pre-validate hook to assign sequential issueNumber if not present
-issueSchema.pre('validate', async function (next) {
+// Collision-safe issue number — timestamp + random suffix instead of
+// "find last + 1" (which races when two reports are submitted close together)
+issueSchema.pre('validate', function (next) {
   if (this.issueNumber) return next();
-  try {
-    const Issue = mongoose.model('Issue');
-    const lastIssue = await Issue.findOne({}, {}, { sort: { createdAt: -1 } });
-    let nextNum = 1001;
-    if (lastIssue && lastIssue.issueNumber) {
-      const match = lastIssue.issueNumber.match(/\d+/);
-      if (match) {
-        nextNum = parseInt(match[0], 10) + 1;
-      }
-    }
-    this.issueNumber = `ISS-${nextNum}`;
-    next();
-  } catch (err) {
-    next(err);
-  }
+  const stamp = Date.now().toString().slice(-6);
+  const rand = Math.floor(100 + Math.random() * 900);
+  this.issueNumber = `ISS-${stamp}${rand}`;
+  next();
 });
 
 module.exports = mongoose.model('Issue', issueSchema);

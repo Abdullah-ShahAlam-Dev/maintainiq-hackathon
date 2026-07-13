@@ -71,6 +71,7 @@ const createIssue = async (req, res) => {
 
     res.status(201).json(issue);
   } catch (err) {
+    console.error('createIssue error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
