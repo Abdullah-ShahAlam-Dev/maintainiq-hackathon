@@ -38,7 +38,7 @@ const issueSchema = new mongoose.Schema(
 // Collision-safe issue number — timestamp + random suffix instead of
 // "find last + 1" (which races when two reports are submitted close together)
 issueSchema.pre('validate', function () {
-  if (this.issueNumber) {
+  if (!this.issueNumber) {
   const stamp = Date.now().toString().slice(-6);
   const rand = Math.floor(100 + Math.random() * 900);
   this.issueNumber = `ISS-${stamp}${rand}`;
