@@ -2,23 +2,48 @@ import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { getUser, logout } from '../utils/auth';
 import { useNavigate } from 'react-router-dom';
+import OverviewTab from './admin/OverviewTab';
+import ApprovalsTab from './admin/ApprovalsTab';
+import IssueManagementTab from './admin/IssueManagementTab';
+
+// TODO(backend): there is no "super admin" role yet — User.role is only
+// 'admin' | 'technician'. Until the backend adds a real super-admin flag,
+// this hardcoded email is a stand-in so the Approvals tab can show the
+// "Pending Admin Signups" section only to the one root account.
+const SUPER_ADMIN_EMAIL = 'admin@test.com';
+
+const TABS = [
+  { key: 'overview', label: 'Overview' },
+  { key: 'approvals', label: 'Approvals' },
+  { key: 'issues', label: 'Issue Management' },
+];
 
 const AdminDashboard = () => {
+  const [activeTab, setActiveTab] = useState('overview');
+
   const [assets, setAssets] = useState([]);
   const [issues, setIssues] = useState([]);
   const [technicians, setTechnicians] = useState([]);
-  const [form, setForm] = useState({ assetCode: '', name: '', category: '', location: '', condition: 'Good' });
+  const [form, setForm] = useState({
+    assetCode: '',
+    name: '',
+    category: '',
+    location: '',
+    condition: 'Good',
+  });
   const [search, setSearch] = useState('');
   const [error, setError] = useState('');
+
   const navigate = useNavigate();
   const user = getUser();
+  const isSuperAdmin = user?.email === SUPER_ADMIN_EMAIL;
 
   const loadData = async () => {
     try {
       const [assetsRes, issuesRes, techRes] = await Promise.all([
         api.get('/assets', { params: search ? { search } : {} }),
         api.get('/issues'),
-        api.get('/auth/technicians')
+        api.get('/auth/technicians'),
       ]);
       setAssets(assetsRes.data);
       setIssues(issuesRes.data);
@@ -57,96 +82,74 @@ const AdminDashboard = () => {
     }
   };
 
-  const openIssuesCount = issues.filter((i) => !['Resolved', 'Closed'].includes(i.status)).length;
-  const criticalCount = issues.filter((i) => i.priority === 'Critical' && !['Resolved', 'Closed'].includes(i.status)).length;
-
   return (
-    <div className="dashboard">
-      <header className="dashboard-header">
-        <h1>MaintainIQ — Admin</h1>
-        <div>
-          <span>{user?.name}</span>
-          <button onClick={() => { logout(); navigate('/login'); }}>Logout</button>
+    <div className="min-h-screen bg-base font-sans text-ink">
+      {/* Header */}
+      <header className="bg-ink text-white border-b-[3px] border-hazard">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <h1 className="font-mono text-sm uppercase tracking-tag m-0">
+            MaintainIQ <span className="text-hazard">/</span> Admin
+          </h1>
+          <div className="flex items-center gap-4 font-mono text-sm">
+            <span>{user?.name}</span>
+            <button
+              onClick={() => {
+                logout();
+                navigate('/login');
+              }}
+              className="bg-transparent border border-white/30 hover:bg-white/10 text-white font-mono text-xs uppercase tracking-tag px-3 py-1.5 rounded-sm"
+            >
+              Logout
+            </button>
+          </div>
         </div>
+
+        {/* Tab strip — riveted control-panel switches */}
+        <nav className="max-w-6xl mx-auto px-6 flex gap-1">
+          {TABS.map((tab) => {
+            const isActive = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`relative font-mono text-xs uppercase tracking-tag px-5 py-3 rounded-t-sm border border-b-0 transition-colors ${
+                  isActive
+                    ? 'bg-base text-ink border-line'
+                    : 'bg-transparent text-white/60 border-transparent hover:text-white'
+                }`}
+              >
+                {isActive && (
+                  <span className="absolute top-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-hazard" />
+                )}
+                <span className="mt-1 block">{tab.label}</span>
+              </button>
+            );
+          })}
+        </nav>
       </header>
 
-      {error && <p className="error-text">{error}</p>}
+      {/* Content */}
+      <main className="max-w-6xl mx-auto px-6 py-8">
+        {error && <p className="error-text mb-4">{error}</p>}
 
-      <section className="summary-cards">
-        <div className="card"><h3>{assets.length}</h3><p>Total Assets</p></div>
-        <div className="card"><h3>{openIssuesCount}</h3><p>Open Issues</p></div>
-        <div className="card critical"><h3>{criticalCount}</h3><p>Critical Issues</p></div>
-      </section>
+        {activeTab === 'overview' && (
+          <OverviewTab
+            assets={assets}
+            issues={issues}
+            form={form}
+            onFormChange={handleFormChange}
+            onCreateAsset={handleCreateAsset}
+            search={search}
+            onSearchChange={setSearch}
+          />
+        )}
 
-      <section>
-        <h2>Register New Asset</h2>
-        <form className="inline-form" onSubmit={handleCreateAsset}>
-          <input name="assetCode" placeholder="Asset Code (e.g. PROJ-01)" value={form.assetCode} onChange={handleFormChange} required />
-          <input name="name" placeholder="Name" value={form.name} onChange={handleFormChange} required />
-          <input name="category" placeholder="Category" value={form.category} onChange={handleFormChange} required />
-          <input name="location" placeholder="Location" value={form.location} onChange={handleFormChange} required />
-          <input name="condition" placeholder="Condition" value={form.condition} onChange={handleFormChange} />
-          <button type="submit">Add Asset</button>
-        </form>
-      </section>
+        {activeTab === 'approvals' && <ApprovalsTab isSuperAdmin={isSuperAdmin} />}
 
-      <section>
-        <h2>Assets</h2>
-        <input
-          className="search-box"
-          placeholder="Search assets..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <div className="asset-grid">
-          {assets.map((asset) => (
-            <div key={asset._id} className="asset-card">
-              <h3>{asset.name}</h3>
-              <p>{asset.assetCode} — {asset.location}</p>
-              <span className={`status-badge status-${asset.status.replace(/\s/g, '')}`}>{asset.status}</span>
-              {asset.qrUrl && <img src={asset.qrUrl} alt="QR" width="100" />}
-              <div className="asset-actions">
-                <a href={`/asset/${asset.assetCode}`} target="_blank" rel="noreferrer">Open Public Page</a>
-                <button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/asset/${asset.assetCode}`)}>
-                  Copy Link
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h2>Issues</h2>
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Issue #</th><th>Title</th><th>Priority</th><th>Status</th><th>Assign Technician</th>
-            </tr>
-          </thead>
-          <tbody>
-            {issues.map((issue) => (
-              <tr key={issue._id} className={issue.priority === 'Critical' ? 'critical-row' : ''}>
-                <td>{issue.issueNumber}</td>
-                <td>{issue.title}</td>
-                <td>{issue.priority}</td>
-                <td>{issue.status}</td>
-                <td>
-                  <select
-                    defaultValue={issue.assignedTechnician?._id || ''}
-                    onChange={(e) => handleAssign(issue._id, e.target.value)}
-                  >
-                    <option value="">-- assign --</option>
-                    {technicians.map((t) => (
-                      <option key={t._id} value={t._id}>{t.name}</option>
-                    ))}
-                  </select>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+        {activeTab === 'issues' && (
+          <IssueManagementTab issues={issues} technicians={technicians} onAssign={handleAssign} />
+        )}
+      </main>
     </div>
   );
 };

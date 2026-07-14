@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --ink: #14181f;
   --panel: #ffffff;
@@ -25,6 +29,11 @@ body {
 }
 
 h1, h2, h3 { font-family: var(--sans); font-weight: 600; letter-spacing: -0.01em; }
+
+/* NOTE: the rules below are the ORIGINAL non-Tailwind styles used by your
+   other pages (Login, Register, PublicAssetPage, ReportIssue, TechnicianDashboard).
+   They are left untouched so nothing else in the app breaks. AdminDashboard has
+   been migrated to Tailwind utility classes and no longer depends on these. */
 
 button {
   cursor: pointer;
@@ -98,7 +107,7 @@ input:focus, select:focus, textarea:focus {
 }
 .auth-card a { color: var(--brand); }
 
-/* ---- Dashboard ---- */
+/* ---- Dashboard (legacy — TechnicianDashboard still uses these) ---- */
 .dashboard { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem 3rem; }
 
 .dashboard-header {
@@ -150,7 +159,6 @@ input:focus, select:focus, textarea:focus {
 
 .asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
 
-/* Nameplate-style asset card — riveted corners */
 .asset-card {
   position: relative;
   background: var(--panel);
@@ -181,7 +189,6 @@ input:focus, select:focus, textarea:focus {
 }
 .asset-actions button { font-size: 0.7rem; padding: 0.4rem 0.7rem; }
 
-/* Ticket-stamp status badges */
 .status-badge {
   display: inline-block;
   padding: 0.15rem 0.55rem;
