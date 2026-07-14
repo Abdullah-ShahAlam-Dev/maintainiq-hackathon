@@ -1,34 +1,36 @@
 const nodemailer = require('nodemailer');
-
-const transporter = nodemailer.createTransport({
+//Global Scope for SMTP connection
+const checkingSMTPEmail = nodemailer.createTransport({
   service: 'gmail',
-  // host: 'smtp.gmail.com',
-  //   port: 465,
-  // secure: true,
   auth: {
     user: process.env.PORTAL_EMAIL,
     pass: process.env.PORTAL_PASSWORD
   }
 });
-
 // Verify the SMTP connection once at startup so config problems (wrong
 // password, App Password not set up, etc.) show up immediately in the logs
 // instead of failing silently on the first real OTP email.
-transporter.verify((err) => {
+checkingSMTPEmail.verify((err) => {
   if (err) {
-    console.error(
-      '[Nodemailer] SMTP verification FAILED — OTP emails will not send. ' +
-        'Most common cause: PORTAL_PASSWORD is your normal Gmail password instead ' +
-        'of a 16-character Google App Password (requires 2FA enabled on the account). ' +
-        'Generate one at https://myaccount.google.com/apppasswords',
-      err.message
-    );
+
+console.error('[Nodemailer] SMTP Verification Failed: PORTAL_PASSWORD, 16-character Google App Password (requires 2FA enabled on the account)', err.message);
   } else {
-    console.log('[Nodemailer] SMTP connection verified — ready to send OTP emails');
+    console.log('[Nodemailer] SMTP connection verified Sucessfully — ready to send OTP emails');
   }
 });
 
 const sendOtpEmail = async (mail, otp, purpose = 'account verification') => {
+  
+  // creating transporter Local Scope
+  // 1. Transporter ko function ke andar Rakhaa (Har Request = Naya Connection)
+  const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.PORTAL_EMAIL,
+    pass: process.env.PORTAL_PASSWORD
+  }
+});
+  
   const mailOptions = {
     from: process.env.PORTAL_EMAIL,
     to: mail,
