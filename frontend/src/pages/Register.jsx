@@ -39,20 +39,26 @@ const Register = () => {
         payload.append('evidence', evidenceFile);
       }
 
-      await api.post('/auth/register', payload, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      // IMPORTANT: do NOT set Content-Type manually for FormData. The browser
+      // must generate it (it includes a random multipart boundary string) —
+      // overriding it here previously made multer/busboy hang forever waiting
+      // for a boundary that never matched, which is why "Creating..." never
+      // resolved and the OTP modal never appeared.
+      await api.post('/auth/register', payload);
+
+      // The backend already emailed the OTP as part of /register, so the
+      // modal must NOT auto-send again — autoSend={false}.
       setShowOtp(true);
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVerify = async (otp) => {
+  const handleVerify = async (otp, email) => {
     try {
-      const res = await api.post('/auth/verify-otp', { email: form.email, otp });
+      const res = await api.post('/auth/verify-otp', { email, otp });
       if (res.data.user) {
         // 'user' role is auto-approved — verifying OTP logs them straight in
         saveAuth(res.data.user);
@@ -67,8 +73,12 @@ const Register = () => {
     }
   };
 
-  const handleResend = async () => {
-    await api.post('/auth/resend-otp', { email: form.email });
+  const handleResend = async (email) => {
+    try {
+      await api.post('/auth/resend-otp', { email });
+    } catch (err) {
+      throw new Error(err.response?.data?.message || 'Failed to resend OTP');
+    }
   };
 
   return (
@@ -112,11 +122,12 @@ const Register = () => {
 
       {showOtp && (
         <OtpModal
-          email={form.email}
+          initialEmail={form.email}
+          autoSend={false}
           durationSeconds={600}
           title="Verify your email"
+          onSendOtp={handleResend}
           onVerify={handleVerify}
-          onResend={handleResend}
           onClose={() => setShowOtp(false)}
         />
       )}

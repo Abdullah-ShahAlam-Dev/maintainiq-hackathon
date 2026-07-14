@@ -97,7 +97,7 @@ const getPublicAssets = async (req, res) => {
     }
 
     const assets = await Asset.find(query)
-      .select('assetCode name category location status')
+      .select('assetCode name category location status qrUrl')
       .sort({ createdAt: -1 });
 
     res.json(assets);

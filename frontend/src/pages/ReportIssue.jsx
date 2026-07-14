@@ -13,14 +13,12 @@ const ReportIssue = () => {
   const [asset, setAsset] = useState(null);
   const [complaint, setComplaint] = useState('');
   const [reporterName, setReporterName] = useState(loggedIn ? user?.name || '' : '');
-  const [reporterEmail, setReporterEmail] = useState(loggedIn ? user?.email || '' : '');
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSuggested, setAiSuggested] = useState(false);
   const [aiEdited, setAiEdited] = useState(false);
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
-  const [otpSending, setOtpSending] = useState(false);
 
   const [fields, setFields] = useState({
     title: '',
@@ -74,14 +72,14 @@ const ReportIssue = () => {
     if (aiSuggested) setAiEdited(true);
   };
 
-  const submitIssue = async (reportToken) => {
+  const submitIssue = async (email, reportToken) => {
     await api.post('/issues', {
       assetCode: code,
       title: fields.title,
       description: complaint,
       category: fields.category,
       priority: fields.priority,
-      reporterInfo: { name: reporterName || 'Anonymous', email: reporterEmail },
+      reporterInfo: { name: reporterName || 'Anonymous', email: email || '' },
       aiSuggested,
       aiEdited,
       reportToken
@@ -89,6 +87,9 @@ const ReportIssue = () => {
     setSubmitted(true);
   };
 
+  // Clicking "Submit Issue" never sends email/OTP requests itself — the
+  // modal owns that flow entirely (email step -> otp step). This form only
+  // opens the modal for guests; logged-in users skip straight to submission.
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -99,43 +100,33 @@ const ReportIssue = () => {
     }
 
     if (loggedIn) {
-      // Logged-in users bypass OTP entirely — the session cookie is enough.
       try {
-        await submitIssue(null);
+        await submitIssue(user?.email, null);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to submit issue');
       }
       return;
     }
 
-    if (!reporterEmail) {
-      setError('Email is required to verify your report');
-      return;
-    }
+    setShowOtp(true);
+  };
 
-    setOtpSending(true);
+  const handleSendOtp = async (email) => {
     try {
-      await api.post('/public/otp/send', { email: reporterEmail });
-      setShowOtp(true);
+      await api.post('/public/otp/send', { email });
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to send OTP');
-    } finally {
-      setOtpSending(false);
+      throw new Error(err.response?.data?.message || 'Failed to send OTP');
     }
   };
 
-  const handleOtpVerify = async (otp) => {
+  const handleVerifyOtp = async (otp, email) => {
     try {
-      const res = await api.post('/public/otp/verify', { email: reporterEmail, otp });
-      await submitIssue(res.data.reportToken);
+      const res = await api.post('/public/otp/verify', { email, otp });
+      await submitIssue(email, res.data.reportToken);
       setShowOtp(false);
     } catch (err) {
       throw new Error(err.response?.data?.message || 'Verification failed');
     }
-  };
-
-  const handleOtpResend = async () => {
-    await api.post('/public/otp/send', { email: reporterEmail });
   };
 
   if (submitted) {
@@ -158,20 +149,11 @@ const ReportIssue = () => {
         {error && <p className="error-text">{error}</p>}
 
         {!loggedIn && (
-          <>
-            <input
-              placeholder="Your name (optional)"
-              value={reporterName}
-              onChange={(e) => setReporterName(e.target.value)}
-            />
-            <input
-              type="email"
-              placeholder="Your email (required to verify your report)"
-              value={reporterEmail}
-              onChange={(e) => setReporterEmail(e.target.value)}
-              required
-            />
-          </>
+          <input
+            placeholder="Your name (optional)"
+            value={reporterName}
+            onChange={(e) => setReporterName(e.target.value)}
+          />
         )}
 
         <textarea
@@ -206,19 +188,18 @@ const ReportIssue = () => {
           <label>Initial Checks (AI suggested — editable)</label>
           <textarea value={fields.initialChecks} onChange={(e) => handleFieldChange('initialChecks', e.target.value)} rows={2} />
 
-          <button type="submit" disabled={otpSending}>
-            {loggedIn ? 'Submit Issue' : otpSending ? 'Sending code...' : 'Submit & Verify Email'}
-          </button>
+          <button type="submit">{loggedIn ? 'Submit Issue' : 'Submit Issue'}</button>
         </form>
       </div>
 
       {showOtp && (
         <OtpModal
-          email={reporterEmail}
+          initialEmail=""
+          autoSend={false}
           durationSeconds={120}
           title="Verify your report"
-          onVerify={handleOtpVerify}
-          onResend={handleOtpResend}
+          onSendOtp={handleSendOtp}
+          onVerify={handleVerifyOtp}
           onClose={() => setShowOtp(false)}
         />
       )}

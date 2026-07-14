@@ -102,6 +102,7 @@ const IssueManagementTab = ({ issues, technicians, onAssign }) => {
                 <tr className="bg-ink text-white">
                   <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">Issue #</th>
                   <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">Title</th>
+                  <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">Asset Category</th>
                   <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">Priority</th>
                   <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">Status</th>
                   <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">Assign Technician</th>
@@ -113,6 +114,7 @@ const IssueManagementTab = ({ issues, technicians, onAssign }) => {
                   <tr key={issue._id} className={`border-b border-line ${issue.priority === 'Critical' ? 'bg-critical/5' : ''}`}>
                     <td className="px-4 py-2.5 text-sm font-mono">{issue.issueNumber}</td>
                     <td className="px-4 py-2.5 text-sm">{issue.title}</td>
+                    <td className="px-4 py-2.5 text-sm text-muted">{issue.category}</td>
                     <td className="px-4 py-2.5 text-sm">
                       <span className={`inline-block px-2 py-0.5 rounded-sm border text-[10px] font-mono font-bold uppercase tracking-tag ${PRIORITY_STYLES[issue.priority] || 'text-muted border-muted'}`}>
                         {issue.priority}
@@ -132,7 +134,7 @@ const IssueManagementTab = ({ issues, technicians, onAssign }) => {
                 ))}
                 {filteredIssues.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-6 text-sm text-muted text-center">No issues match these filters.</td>
+                    <td colSpan={7} className="px-4 py-6 text-sm text-muted text-center">No issues match these filters.</td>
                   </tr>
                 )}
               </tbody>
