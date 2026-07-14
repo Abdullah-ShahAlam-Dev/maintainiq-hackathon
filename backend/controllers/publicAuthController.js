@@ -18,7 +18,7 @@ const sendGuestOtp = async (req, res) => {
     await GuestOtp.findOneAndUpdate(
       { email: cleanEmail },
       { otp, otpExpiry, verified: false },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     );
 
     await sendOtpEmail(cleanEmail, otp, 'issue report verification');
