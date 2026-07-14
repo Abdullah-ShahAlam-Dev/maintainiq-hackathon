@@ -1,7 +1,8 @@
 const nodemailer = require('nodemailer');
 //Global Scope for SMTP connection
 const checkingSMTPEmail = nodemailer.createTransport({
-  service: 'gmail',
+ host: "smtp-relay.brevo.com", // Example host
+  port: 587,
   auth: {
     user: process.env.PORTAL_EMAIL,
     pass: process.env.PORTAL_PASSWORD
@@ -31,7 +32,8 @@ const sendOtpEmail = async (mail, otp, purpose = 'account verification') => {
   // creating transporter Local Scope
   // 1. Transporter ko function ke andar Rakhaa (Har Request = Naya Connection)
   const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: "smtp-relay.brevo.com", // Example host
+  port: 587,
   auth: {
     user: process.env.PORTAL_EMAIL,
     pass: process.env.PORTAL_PASSWORD
