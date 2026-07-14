@@ -84,6 +84,28 @@ const getAssetByCode = async (req, res) => {
   }
 };
 
+// PUBLIC route — asset registry list for the "/" landing page, safe fields only
+const getPublicAssets = async (req, res) => {
+  try {
+    const { search } = req.query;
+    const query = {};
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { assetCode: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const assets = await Asset.find(query)
+      .select('assetCode name category location status')
+      .sort({ createdAt: -1 });
+
+    res.json(assets);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
 // PUBLIC route — only safe fields, no private data
 const getPublicAsset = async (req, res) => {
   try {
@@ -142,6 +164,7 @@ module.exports = {
   getAssets,
   getAssetById,
   getAssetByCode,
+  getPublicAssets,
   getPublicAsset,
   updateAsset,
   assignTechnician

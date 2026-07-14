@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const Issue = require('../models/Issue');
 const Asset = require('../models/Asset');
 const MaintenanceRecord = require('../models/MaintenanceRecord');
@@ -23,7 +24,9 @@ const ASSET_STATUS_MAP = {
   Resolved: 'Operational'
 };
 
-// Create issue — used by both public reporting page and internal dashboard
+// Create issue — used by both public reporting page and internal dashboard.
+// Guests must prove they completed OTP verification via a signed reportToken;
+// logged-in users (req.user set by optionalAuth) bypass this entirely.
 const createIssue = async (req, res) => {
   try {
     const {
@@ -35,11 +38,43 @@ const createIssue = async (req, res) => {
       reporterInfo,
       evidenceUrls,
       aiSuggested,
-      aiEdited
+      aiEdited,
+      reportToken
     } = req.body;
 
     if (!assetCode || !title || !description || !category || !priority) {
       return res.status(400).json({ message: 'assetCode, title, description, category and priority are required' });
+    }
+
+    let finalReporterInfo = reporterInfo || {};
+
+    if (req.user) {
+      // Logged-in reporter — trust the session, bypass OTP entirely.
+      finalReporterInfo = {
+        name: req.user.name || finalReporterInfo.name || 'Registered user',
+        email: finalReporterInfo.email || '',
+        phone: finalReporterInfo.phone || ''
+      };
+    } else {
+      // Guest reporter — must present a valid, unexpired reportToken issued
+      // by POST /api/public/otp/verify, and it must match the email they typed.
+      if (!reportToken) {
+        return res.status(403).json({ message: 'Email verification required before submitting an issue' });
+      }
+      if (!finalReporterInfo.email) {
+        return res.status(400).json({ message: 'reporterInfo.email is required for guest reports' });
+      }
+
+      let decoded;
+      try {
+        decoded = jwt.verify(reportToken, process.env.JWT_SECRET);
+      } catch (err) {
+        return res.status(403).json({ message: 'Verification expired — please verify your email again' });
+      }
+
+      if (decoded.purpose !== 'guest-report' || decoded.email !== finalReporterInfo.email.toLowerCase().trim()) {
+        return res.status(403).json({ message: 'Verification does not match the email provided' });
+      }
     }
 
     const asset = await Asset.findOne({ assetCode: assetCode.trim() });
@@ -53,7 +88,7 @@ const createIssue = async (req, res) => {
       description,
       category,
       priority,
-      reporterInfo: reporterInfo || {},
+      reporterInfo: finalReporterInfo,
       evidenceUrls: evidenceUrls || [],
       aiSuggested: !!aiSuggested,
       aiEdited: !!aiEdited
@@ -64,7 +99,7 @@ const createIssue = async (req, res) => {
 
     await logHistory({
       assetId: asset._id,
-      actor: reporterInfo?.name || 'Public reporter',
+      actor: finalReporterInfo?.name || 'Public reporter',
       action: `Issue ${issue.issueNumber} reported: ${title}`,
       relatedIssueId: issue._id
     });
@@ -79,13 +114,14 @@ const createIssue = async (req, res) => {
 // List issues — internal dashboard, supports filters
 const getIssues = async (req, res) => {
   try {
-    const { status, priority, category, technician, assetId } = req.query;
+    const { status, priority, category, technician, assetId, reporterEmail } = req.query;
     const query = {};
     if (status) query.status = status;
     if (priority) query.priority = priority;
     if (category) query.category = category;
     if (technician) query.assignedTechnician = technician;
     if (assetId) query.assetId = assetId;
+    if (reporterEmail) query['reporterInfo.email'] = reporterEmail.toLowerCase().trim();
 
     const issues = await Issue.find(query)
       .populate('assetId', 'assetCode name location')

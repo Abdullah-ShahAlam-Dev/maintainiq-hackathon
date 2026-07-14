@@ -5,20 +5,23 @@ import { useNavigate } from 'react-router-dom';
 import OverviewTab from './admin/OverviewTab';
 import ApprovalsTab from './admin/ApprovalsTab';
 import IssueManagementTab from './admin/IssueManagementTab';
-
-// TODO(backend): there is no "super admin" role yet — User.role is only
-// 'admin' | 'technician'. Until the backend adds a real super-admin flag,
-// this hardcoded email is a stand-in so the Approvals tab can show the
-// "Pending Admin Signups" section only to the one root account.
-const SUPER_ADMIN_EMAIL = 'admin@test.com';
-
-const TABS = [
-  { key: 'overview', label: 'Overview' },
-  { key: 'approvals', label: 'Approvals' },
-  { key: 'issues', label: 'Issue Management' },
-];
+import AdministratorsTab from './admin/AdministratorsTab';
+import TechniciansTab from './admin/TechniciansTab';
+import UsersTab from './admin/UsersTab';
 
 const AdminDashboard = () => {
+  const user = getUser();
+  const isSuperAdmin = user?.role === 'superadmin';
+
+  const TABS = [
+    { key: 'overview', label: 'Overview' },
+    { key: 'approvals', label: 'Approvals' },
+    { key: 'issues', label: 'Issue Management' },
+    ...(isSuperAdmin ? [{ key: 'administrators', label: 'Administrators' }] : []),
+    { key: 'technicians', label: 'Technicians' },
+    { key: 'users', label: 'Users' },
+  ];
+
   const [activeTab, setActiveTab] = useState('overview');
 
   const [assets, setAssets] = useState([]);
@@ -35,8 +38,6 @@ const AdminDashboard = () => {
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
-  const user = getUser();
-  const isSuperAdmin = user?.email === SUPER_ADMIN_EMAIL;
 
   const loadData = async () => {
     try {
@@ -84,19 +85,15 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-base font-sans text-ink">
-      {/* Header */}
       <header className="bg-ink text-white border-b-[3px] border-hazard">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <h1 className="font-mono text-sm uppercase tracking-tag m-0">
-            MaintainIQ <span className="text-hazard">/</span> Admin
+            MaintainIQ <span className="text-hazard">/</span> {isSuperAdmin ? 'Super Admin' : 'Administrator'}
           </h1>
           <div className="flex items-center gap-4 font-mono text-sm">
             <span>{user?.name}</span>
             <button
-              onClick={() => {
-                logout();
-                navigate('/login');
-              }}
+              onClick={() => { logout(); navigate('/login'); }}
               className="bg-transparent border border-white/30 hover:bg-white/10 text-white font-mono text-xs uppercase tracking-tag px-3 py-1.5 rounded-sm"
             >
               Logout
@@ -104,15 +101,14 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Tab strip — riveted control-panel switches */}
-        <nav className="max-w-6xl mx-auto px-6 flex gap-1">
+        <nav className="max-w-6xl mx-auto px-6 flex gap-1 overflow-x-auto">
           {TABS.map((tab) => {
             const isActive = activeTab === tab.key;
             return (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`relative font-mono text-xs uppercase tracking-tag px-5 py-3 rounded-t-sm border border-b-0 transition-colors ${
+                className={`relative whitespace-nowrap font-mono text-xs uppercase tracking-tag px-5 py-3 rounded-t-sm border border-b-0 transition-colors ${
                   isActive
                     ? 'bg-base text-ink border-line'
                     : 'bg-transparent text-white/60 border-transparent hover:text-white'
@@ -128,7 +124,6 @@ const AdminDashboard = () => {
         </nav>
       </header>
 
-      {/* Content */}
       <main className="max-w-6xl mx-auto px-6 py-8">
         {error && <p className="error-text mb-4">{error}</p>}
 
@@ -149,6 +144,12 @@ const AdminDashboard = () => {
         {activeTab === 'issues' && (
           <IssueManagementTab issues={issues} technicians={technicians} onAssign={handleAssign} />
         )}
+
+        {activeTab === 'administrators' && isSuperAdmin && <AdministratorsTab />}
+
+        {activeTab === 'technicians' && <TechniciansTab />}
+
+        {activeTab === 'users' && <UsersTab />}
       </main>
     </div>
   );

@@ -36,11 +36,22 @@ const TechnicianDashboard = () => {
 
   const handleAddMaintenance = async (issueId) => {
     const data = noteForm[issueId];
+    
+    // LOG 1: Button click hotay hi data check karo
+    console.log("👉 1. BUTTON CLICKED! Issue ID:", issueId);
+    console.log("👉 2. FORM DATA TO SEND:", data);
+
     if (!data?.notes || data.cost === undefined) {
+      console.error("❌ 3. VALIDATION FAILED: Notes or Cost is missing!");
+      alert("Validation Error: Notes aur Cost lazmi likhein!");
       setError('Notes and cost are required');
       return;
     }
+    
     try {
+      // LOG 2: Backend ko request bhejte waqt
+      console.log("⏳ 4. SENDING API REQUEST to /maintenance...");
+      
       await api.post('/maintenance', {
         issueId,
         notes: data.notes,
@@ -48,10 +59,21 @@ const TechnicianDashboard = () => {
         timeSpent: Number(data.timeSpent) || 0,
         finalCondition: data.finalCondition || 'Good'
       });
+      
+      // LOG 3: Agar request successfully save ho jaye
+      console.log("✅ 5. API SUCCESS! Data saved.");
+      alert("Success: Maintenance note successfully save ho gaya hai!");
+      
       setError('');
       loadIssues();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to add maintenance record');
+      // LOG 4: Agar backend se koi error aaye
+      console.error("❌ 6. API CATCH ERROR:", err);
+      console.error("❌ ERROR DETAILS:", err.response?.data?.message || err.message);
+      
+      const errorMsg = err.response?.data?.message || 'Failed to add maintenance record';
+      alert("API Error: " + errorMsg);
+      setError(errorMsg);
     }
   };
 

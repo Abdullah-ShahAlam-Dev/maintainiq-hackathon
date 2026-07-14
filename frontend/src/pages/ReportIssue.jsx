@@ -1,18 +1,26 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import { isLoggedIn, getUser } from '../utils/auth';
+import OtpModal from '../components/OtpModal';
 
 const ReportIssue = () => {
   const { code } = useParams();
   const navigate = useNavigate();
+  const loggedIn = isLoggedIn();
+  const user = getUser();
+
   const [asset, setAsset] = useState(null);
   const [complaint, setComplaint] = useState('');
-  const [reporterName, setReporterName] = useState('');
+  const [reporterName, setReporterName] = useState(loggedIn ? user?.name || '' : '');
+  const [reporterEmail, setReporterEmail] = useState(loggedIn ? user?.email || '' : '');
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSuggested, setAiSuggested] = useState(false);
   const [aiEdited, setAiEdited] = useState(false);
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [showOtp, setShowOtp] = useState(false);
+  const [otpSending, setOtpSending] = useState(false);
 
   const [fields, setFields] = useState({
     title: '',
@@ -66,35 +74,76 @@ const ReportIssue = () => {
     if (aiSuggested) setAiEdited(true);
   };
 
+  const submitIssue = async (reportToken) => {
+    await api.post('/issues', {
+      assetCode: code,
+      title: fields.title,
+      description: complaint,
+      category: fields.category,
+      priority: fields.priority,
+      reporterInfo: { name: reporterName || 'Anonymous', email: reporterEmail },
+      aiSuggested,
+      aiEdited,
+      reportToken
+    });
+    setSubmitted(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
     if (!fields.title || !fields.category) {
       setError('Title and category are required — run AI suggestion or fill manually');
       return;
     }
-    try {
-      await api.post('/issues', {
-        assetCode: code,
-        title: fields.title,
-        description: complaint,
-        category: fields.category,
-        priority: fields.priority,
-        reporterInfo: { name: reporterName || 'Anonymous' },
-        aiSuggested,
-        aiEdited
-      });
-      setSubmitted(true);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to submit issue');
+
+    if (loggedIn) {
+      // Logged-in users bypass OTP entirely — the session cookie is enough.
+      try {
+        await submitIssue(null);
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to submit issue');
+      }
+      return;
     }
+
+    if (!reporterEmail) {
+      setError('Email is required to verify your report');
+      return;
+    }
+
+    setOtpSending(true);
+    try {
+      await api.post('/public/otp/send', { email: reporterEmail });
+      setShowOtp(true);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to send OTP');
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
+  const handleOtpVerify = async (otp) => {
+    try {
+      const res = await api.post('/public/otp/verify', { email: reporterEmail, otp });
+      await submitIssue(res.data.reportToken);
+      setShowOtp(false);
+    } catch (err) {
+      throw new Error(err.response?.data?.message || 'Verification failed');
+    }
+  };
+
+  const handleOtpResend = async () => {
+    await api.post('/public/otp/send', { email: reporterEmail });
   };
 
   if (submitted) {
     return (
       <div className="public-page">
         <div className="public-card">
-          <h2>Issue Reported Successfully</h2>
-          <p>Thank you — the maintenance team has been notified.</p>
+          <h2>Thanks for reporting!</h2>
+          <p>We will resolve it ASAP.</p>
           <button onClick={() => navigate(`/asset/${code}`)}>Back to Asset Page</button>
         </div>
       </div>
@@ -108,11 +157,22 @@ const ReportIssue = () => {
         {asset && <p>Asset: <strong>{asset.name}</strong> ({asset.assetCode})</p>}
         {error && <p className="error-text">{error}</p>}
 
-        <input
-          placeholder="Your name (optional)"
-          value={reporterName}
-          onChange={(e) => setReporterName(e.target.value)}
-        />
+        {!loggedIn && (
+          <>
+            <input
+              placeholder="Your name (optional)"
+              value={reporterName}
+              onChange={(e) => setReporterName(e.target.value)}
+            />
+            <input
+              type="email"
+              placeholder="Your email (required to verify your report)"
+              value={reporterEmail}
+              onChange={(e) => setReporterEmail(e.target.value)}
+              required
+            />
+          </>
+        )}
 
         <textarea
           placeholder="Describe the problem in your own words..."
@@ -146,9 +206,22 @@ const ReportIssue = () => {
           <label>Initial Checks (AI suggested — editable)</label>
           <textarea value={fields.initialChecks} onChange={(e) => handleFieldChange('initialChecks', e.target.value)} rows={2} />
 
-          <button type="submit">Submit Issue</button>
+          <button type="submit" disabled={otpSending}>
+            {loggedIn ? 'Submit Issue' : otpSending ? 'Sending code...' : 'Submit & Verify Email'}
+          </button>
         </form>
       </div>
+
+      {showOtp && (
+        <OtpModal
+          email={reporterEmail}
+          durationSeconds={120}
+          title="Verify your report"
+          onVerify={handleOtpVerify}
+          onResend={handleOtpResend}
+          onClose={() => setShowOtp(false)}
+        />
+      )}
     </div>
   );
 };

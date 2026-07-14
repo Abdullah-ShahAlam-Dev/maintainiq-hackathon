@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const protect = require('../middleware/auth');
+const optionalAuth = require('../middleware/optionalAuth');
 const allowRoles = require('../middleware/role');
 const {
   createIssue,
@@ -11,8 +12,9 @@ const {
   reopenIssue
 } = require('../controllers/issueController');
 
-// Public reporting — no login required (person scanning QR reports an issue)
-router.post('/', createIssue);
+// Public reporting — no login required, but if a valid session cookie is
+// present (logged-in user), req.user gets attached and the OTP check is skipped.
+router.post('/', optionalAuth, createIssue);
 
 // Internal dashboard routes — require login
 router.get('/', protect, getIssues);

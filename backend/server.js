@@ -4,7 +4,9 @@ dns.setServers(['1.1.1.1', '8.8.8.8']);
 
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
+const seedSuperAdmin = require('./config/seedSuperAdmin');
 
 const authRoutes = require('./routes/authRoutes');
 const assetRoutes = require('./routes/assetRoutes');
@@ -17,10 +19,19 @@ const uploadRoutes = require('./routes/uploadRoutes');
 
 const app = express();
 
-app.use(cors());
+// credentials:true + an explicit origin are required for the httpOnly cookie
+// to be sent/accepted cross-site (frontend on Vercel, backend on Render).
+// cors() with no options (wildcard) will NOT work once cookies are involved.
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true
+  })
+);
 app.use(express.json());
+app.use(cookieParser());
 
-connectDB();
+connectDB().then(seedSuperAdmin);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/assets', assetRoutes);
