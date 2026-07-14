@@ -7,15 +7,22 @@ const checkingSMTPEmail = nodemailer.createTransport({
     pass: process.env.PORTAL_PASSWORD
   }
 });
+
+
 // Verify the SMTP connection once at startup so config problems (wrong
 // password, App Password not set up, etc.) show up immediately in the logs
 // instead of failing silently on the first real OTP email.
 checkingSMTPEmail.verify((err) => {
   if (err) {
-
-console.error('[Nodemailer] SMTP Verification Failed: PORTAL_PASSWORD, 16-character Google App Password (requires 2FA enabled on the account)', err.message);
+    console.error(
+      '[Nodemailer] SMTP verification FAILED — OTP emails will not send. ' +
+        'Most common cause: PORTAL_PASSWORD is your normal Gmail password instead ' +
+        'of a 16-character Google App Password (requires 2FA enabled on the account). ' +
+        'Generate one at https://myaccount.google.com/apppasswords',
+      err.message
+    );
   } else {
-    console.log('[Nodemailer] SMTP connection verified Sucessfully — ready to send OTP emails');
+    console.log('[Nodemailer] SMTP connection verified — ready to send OTP emails');
   }
 });
 
