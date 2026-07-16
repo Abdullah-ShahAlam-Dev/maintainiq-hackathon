@@ -1,147 +1,104 @@
 # MaintainIQ
 
-**AI-Powered QR Maintenance & Asset History Platform**
-Scan. Report. Diagnose. Maintain.
-
-Built for the SMIT Final Hackathon — Track A (Advanced Full-Stack + GenAI)
+**AI-Powered QR Maintenance & Asset Management Platform**
+*Scan. Report. Diagnose. Maintain.*
 
 ---
 
-## Live Links
+## 🚀 Live Links & Demo
 
-- **Frontend (live):** https://maintainiq-frontend.vercel.app
-- **Backend API (live):** https://maintainiq-hackathon.onrender.com
-- **Demo credentials:**
-  - Admin — `admin@test.com` / `123456`
-  - Technician — *(register one at `/register`, or add here once created)*
+- **Frontend (Live):** [https://maintainiq-frontend.vercel.app](https://maintainiq-frontend.vercel.app)
+- **Backend API (Live):** [https://maintainiq-hackathon.onrender.com](https://maintainiq-hackathon.onrender.com)
+- **Demo Credentials:**
+  - **Super Admin:** 
+  - *(Feel free to register a new User or Technician or adminstrator account via the `/register` page using the OTP flow).*
+  You can access your account once Super ADMIN will aproved your request 
 
-> Note: the backend is on Render's free tier, so the first request after inactivity can take 20–30 seconds to wake up.
-
----
-
-## Overview
-
-MaintainIQ gives every physical asset (projector, AC, camera, etc.) a digital identity: a unique asset code, a QR-accessible public page, an AI-assisted issue reporting flow, a controlled maintenance workflow, and a permanent service history. It's built for schools, hospitals, offices, and facility-management teams who currently track maintenance across registers, phone calls, and WhatsApp.
-
-The QR code is only the entry point — the real product value is in issue triage, technician assignment, maintenance records, and accountability.
+> **Note:** The backend is deployed on Render's free tier. The first request may take 20–30 seconds to wake up from a cold start.
 
 ---
 
-## Tech Stack
+## 💡 Project Overview
 
-| Layer | Technology |
-|---|---|
-| Frontend | React (Vite), plain JavaScript, React Router |
-| Backend | Node.js, Express, plain JavaScript |
-| Database | MongoDB + Mongoose |
-| Auth | JWT + bcrypt, role-based (Admin / Technician) |
-| AI | OpenRouter (multi-model fallback chain) for AI Issue Triage |
-| QR Codes | `qrcode` npm package |
-| Media Storage | Cloudinary |
-| Deployment | Vercel (frontend) + Render (backend) |
+MaintainIQ is a comprehensive facility and asset management platform designed to replace manual registers and WhatsApp complaints. It gives every physical asset (ACs, projectors, medical equipment) a digital identity via a unique QR code. 
+
+When a user scans the QR code, they can view safe public details and report issues. The platform uses **Generative AI** to instantly triage the complaint (suggesting causes and initial checks) before routing it through a strict, role-based maintenance workflow. 
+
+**This project demonstrates advanced full-stack capabilities including Cookie-based JWT Auth, strict Role-Based Access Control (RBAC), AI integration, PDF generation, and complex database relationships.**
 
 ---
 
-## Core Features
-
-- **Asset Management** — register assets with a unique code, category, location, condition, and service dates
-- **QR Code Generation** — auto-generated on asset creation, links to a safe public asset page
-- **Public Asset Page** — no login required; shows safe info only (no private notes/costs)
-- **AI Issue Triage** — converts a natural-language complaint into a structured, editable suggestion (title, category, priority, possible causes, initial checks) before submission
-- **Issue Reporting** — public reporting form, tied to a specific asset
-- **Assignment Workflow** — admin assigns issues to technicians
-- **Maintenance Workflow** — controlled status transitions (Reported → Assigned → Inspection Started → Maintenance In Progress → Resolved → Closed/Reopened), technicians can only act on their own assigned issues
-- **Business Rule Enforcement** (server-side, not just UI):
-  - Duplicate asset codes rejected
-  - No skipping status transitions
-  - Cannot resolve an issue without a maintenance note
-  - Maintenance cost cannot be negative
-  - Next service date cannot be before the completion date
-  - Closed issues are locked until reopened
-- **Asset History** — every meaningful action (status change, assignment, maintenance entry) is automatically logged with actor, action, and timestamp
-
----
-
-## Project Structure
-
-```
-Final Hechathon/
-├── backend/
-│   ├── config/          # DB + Cloudinary config
-│   ├── controllers/      # Route logic (auth, asset, issue, maintenance, ai, history, upload)
-│   ├── middleware/       # JWT auth, role-check, file upload
-│   ├── models/            # Mongoose schemas (User, Asset, Issue, MaintenanceRecord, History)
-│   ├── routes/             # Express routers
-│   ├── utils/               # Shared helpers (history logger)
-│   └── server.js
-└── frontend/
-    └── src/
-        ├── api/           # Axios instance with JWT interceptor
-        ├── components/    # ProtectedRoute
-        ├── pages/          # Login, Register, AdminDashboard, TechnicianDashboard,
-        │                   # PublicAssetPage, ReportIssue
-        ├── utils/          # Auth helpers (localStorage token/user)
-        └── App.jsx
-```
-
----
-
-## Running Locally
-
-### Backend
-```bash
-cd backend
-npm install
-# create a .env file with:
-#   MONGODB_URI=
-#   JWT_SECRET=
-#   PORT=5000
-#   FRONTEND_URL=http://localhost:5173
-#   OPENROUTER_API_KEY=
-#   CLOUDINARY_CLOUD_NAME=
-#   CLOUDINARY_API_KEY=
-#   CLOUDINARY_API_SECRET=
-node server.js
-```
+## 🛠️ Comprehensive Tech Stack
 
 ### Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
+- **Framework:** React.js (Vite)
+- **Styling:** Tailwind CSS & Custom CSS
+- **Routing:** React Router DOM
+- **PDF Generation:** `jspdf` (for generating Asset QR Posters and Issue History Reports)
+- **QR Generation:** `qrcode` npm package
+
+### Backend & Database
+- **Runtime & Framework:** Node.js, Express.js
+- **Database:** MongoDB with Mongoose (Complex schemas with population and aggregations)
+- **Architecture:** MVC (Model-View-Controller) Pattern
+
+### Security, Auth & Roles
+- **Authentication:** HttpOnly Cookie-based JWT (Secure, SameSite configurations for production)
+- **Authorization:** Custom Middleware enforcing strict RBAC (Super Admin, Admin, Technician, User)
+- **Verification:** Dual OTP System (Nodemailer/Resend) for Signup verification and Guest Issue Reporting.
+
+### Cloud Integrations & AI
+- **Generative AI:** OpenRouter API (Multi-model fallback chain for AI Issue Triage)
+- **Media Storage:** Cloudinary (For Asset images and maintenance evidence)
+- **Deployment:** Vercel (Frontend) & Render (Backend)
 
 ---
 
-## API Overview
+## 🔥 Core Features & System Architecture
 
-| Method | Endpoint | Access |
-|---|---|---|
-| POST | `/api/auth/register` | Public |
-| POST | `/api/auth/login` | Public |
-| GET | `/api/auth/technicians` | Admin |
-| POST | `/api/assets` | Admin |
-| GET | `/api/assets` | Logged in |
-| GET | `/api/public/asset/:code` | Public (safe fields only) |
-| POST | `/api/issues` | Public (issue reporting) |
-| GET | `/api/issues` | Logged in |
-| PUT | `/api/issues/:id/assign` | Admin |
-| PUT | `/api/issues/:id/status` | Admin / assigned Technician |
-| PUT | `/api/issues/:id/reopen` | Admin |
-| POST | `/api/maintenance` | Admin / Technician |
-| GET | `/api/history/:assetId` | Logged in |
-| POST | `/api/ai/triage` | Public |
-| POST | `/api/upload` | Logged in (Cloudinary evidence upload) |
+### 1. Advanced Role-Based Access Control (RBAC)
+- **Super Admin:** Full system control, including permanent asset deletion and user management.
+- **Admin:** Can register assets, generate reports, approve pending signups, and assign issues.
+- **Technician:** Restricted access; can only view and update issues explicitly assigned to them.
+- **User/Guest:** Can scan QR codes, view public safe-data, and report issues (secured via OTP).
+
+### 2. Smart Asset Management & QR Code Posters
+- Complete CRUD operations for physical assets.
+- System automatically generates a unique QR code linked to a safe public URL.
+- **Print-Ready Exports:** Admins can download a branded A5 PDF Poster for each asset containing the QR code, asset details, and scanning instructions.
+
+### 3. AI Issue Triage
+- Converts a user's natural-language complaint (e.g., "AC is making noise and leaking") into structured data.
+- Automatically suggests a professional Title, Category, Priority, Possible Causes, and Safe Initial Checks.
+- Users can review and edit AI suggestions before final submission.
+
+### 4. Robust Maintenance Workflow & Data Integrity
+- Strict server-side validation for status transitions (Reported → Assigned → Inspection Started → Maintenance In Progress → Resolved).
+- Cannot resolve an issue without adding a maintenance note.
+- **Graceful Orphaned Data Handling:** If a Super Admin deletes an asset, its related issues are not permanently lost. They are preserved as historical records and labeled as *"Asset Removed"* in the dashboards.
+
+### 5. Permanent Asset History & PDF Reporting
+- Every meaningful action (status change, assignment, maintenance entry) is automatically logged with the actor, action, and timestamp.
+- **Downloadable Reports:** Admins can generate a complete PDF lifecycle report of any issue, detailing reporter info, AI suggestions, technician notes, and status timelines.
 
 ---
 
-## Known Limitations
+## 📂 Project Structure
 
-- Asset history is fully tracked on the backend, but there's no dedicated frontend timeline view yet.
-- Evidence photo/video upload endpoint (Cloudinary) is built but not yet wired into the Report Issue / Maintenance Note forms.
-
----
-
-## AI Usage Disclosure
-
-AI assistance (Claude) was used during development for scaffolding, debugging deployment/DNS issues, and structuring the AI Issue Triage prompt. All architecture decisions, business logic, and final implementation were reviewed and understood by the developer.
+```text
+MaintainIQ/
+├── backend/
+│   ├── config/           # DB, Cloudinary, and SuperAdmin Seed configs
+│   ├── controllers/      # Business logic (Auth, Assets, Issues, AI, Public OTP)
+│   ├── middleware/       # Cookie-auth, Role checks, Optional Auth, File uploads
+│   ├── models/           # Mongoose Schemas (User, Asset, Issue, History, GuestOtp)
+│   ├── routes/           # Express API endpoints
+│   ├── utils/            # Shared utilities (History Logger, generateOtp, sendEmail)
+│   └── server.js         # Entry point
+└── frontend/
+    └── src/
+        ├── api/          # Axios instance (configured withCredentials for cookies)
+        ├── components/   # Reusable UI (OtpModal, ProtectedRoutes)
+        ├── pages/        # Role-specific Dashboards, Public Registry, Report Issue
+        ├── utils/        # Client-side Auth state management
+        └── App.jsx       # Route definitions
