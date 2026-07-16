@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { isLoggedIn, getUser } from '../utils/auth';
 import OtpModal from '../components/OtpModal';
+import { ASSET_CATEGORIES, OTHER_CATEGORY } from '../constants/categories';
 
 const ReportIssue = () => {
   const { code } = useParams();
@@ -19,6 +20,7 @@ const ReportIssue = () => {
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
 
   const [fields, setFields] = useState({
     title: '',
@@ -50,13 +52,18 @@ const ReportIssue = () => {
       if (res.data.aiUnavailable) {
         setError('AI suggestion unavailable right now — please fill the fields manually below');
       } else {
+        const aiCategory = res.data.category || '';
         setFields({
           title: res.data.title || '',
-          category: res.data.category || '',
+          category: aiCategory,
           priority: res.data.priority || 'Medium',
           possibleCauses: (res.data.possibleCauses || []).join(', '),
           initialChecks: (res.data.initialChecks || []).join(', ')
         });
+        // If the AI's suggested category isn't one of our fixed options,
+        // fall back to "Other" and keep the AI's wording in the custom box
+        // instead of silently dropping it or forcing a mismatch.
+        setShowCustomCategory(Boolean(aiCategory) && !ASSET_CATEGORIES.includes(aiCategory));
         setAiSuggested(true);
         setAiEdited(false);
       }
@@ -70,6 +77,17 @@ const ReportIssue = () => {
   const handleFieldChange = (field, value) => {
     setFields({ ...fields, [field]: value });
     if (aiSuggested) setAiEdited(true);
+  };
+
+  const handleCategorySelect = (e) => {
+    const value = e.target.value;
+    if (value === OTHER_CATEGORY) {
+      setShowCustomCategory(true);
+      handleFieldChange('category', '');
+    } else {
+      setShowCustomCategory(false);
+      handleFieldChange('category', value);
+    }
   };
 
   const submitIssue = async (email, reportToken) => {
@@ -172,7 +190,21 @@ const ReportIssue = () => {
           <input value={fields.title} onChange={(e) => handleFieldChange('title', e.target.value)} required />
 
           <label>Category</label>
-          <input value={fields.category} onChange={(e) => handleFieldChange('category', e.target.value)} required />
+          <select value={showCustomCategory ? OTHER_CATEGORY : fields.category} onChange={handleCategorySelect} required>
+            <option value="">Select category...</option>
+            {ASSET_CATEGORIES.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+            <option value={OTHER_CATEGORY}>{OTHER_CATEGORY}</option>
+          </select>
+          {showCustomCategory && (
+            <input
+              placeholder="Specify category"
+              value={fields.category}
+              onChange={(e) => handleFieldChange('category', e.target.value)}
+              required
+            />
+          )}
 
           <label>Priority</label>
           <select value={fields.priority} onChange={(e) => handleFieldChange('priority', e.target.value)}>

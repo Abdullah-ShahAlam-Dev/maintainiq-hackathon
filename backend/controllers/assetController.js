@@ -159,6 +159,29 @@ const assignTechnician = async (req, res) => {
   }
 };
 
+// Super Admin only (enforced in the route). Deliberately does NOT touch any
+// Issue documents that reference this asset — they stay as historical
+// records. Issue.assetId will simply fail to populate (resolves to null)
+// after this, and the frontend shows "Asset Removed" wherever that happens.
+const deleteAsset = async (req, res) => {
+  try {
+    const asset = await Asset.findById(req.params.id);
+    if (!asset) return res.status(404).json({ message: 'Asset not found' });
+
+    await logHistory({
+      assetId: asset._id,
+      actor: req.user.role + ':' + req.user.id,
+      action: `Asset ${asset.assetCode} deleted`
+    });
+
+    await asset.deleteOne();
+
+    res.json({ message: 'Asset deleted' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
 module.exports = {
   createAsset,
   getAssets,
@@ -167,5 +190,6 @@ module.exports = {
   getPublicAssets,
   getPublicAsset,
   updateAsset,
-  assignTechnician
+  assignTechnician,
+  deleteAsset
 };

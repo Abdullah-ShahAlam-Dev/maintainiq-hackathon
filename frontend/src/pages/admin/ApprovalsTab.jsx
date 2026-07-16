@@ -40,10 +40,10 @@ const PendingRow = ({ person, onDecide, busy }) => (
 );
 
 const ApprovalCard = ({ title, subtitle, people, onDecide, busyId, emptyLabel }) => (
-  <section className="bg-panel border border-line rounded-sm">
-    <div className="border-b border-line px-5 py-3">
-      <h2 className="font-mono text-xs uppercase tracking-tag text-muted m-0 border-b-0">{title}</h2>
-      {subtitle && <p className="text-xs text-muted mt-1 mb-0">{subtitle}</p>}
+  <section className="bg-panel border border-line rounded-sm overflow-hidden">
+    <div className="bg-ink px-5 py-3 border-b-[5px] border-hazard">
+      <h2 className="font-mono text-xs uppercase tracking-tag text-white m-0 border-b-0">{title}</h2>
+      {subtitle && <p className="text-xs text-white/60 mt-1 mb-0">{subtitle}</p>}
     </div>
     <div className="p-5 space-y-2">
       {people.length === 0 && <p className="text-sm text-muted italic">{emptyLabel}</p>}

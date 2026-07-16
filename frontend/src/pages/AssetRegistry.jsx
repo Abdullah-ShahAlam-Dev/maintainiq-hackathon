@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
+import { ASSET_CATEGORIES, OTHER_CATEGORY } from '../constants/categories';
 
 const STATUS_CLASS = {
   Operational: 'text-success border-success',
@@ -30,10 +31,6 @@ const AssetRegistry = () => {
       .catch(() => setError('Failed to load asset registry'));
   }, [search]);
 
-  const categories = useMemo(
-    () => [...new Set(assets.map((a) => a.category).filter(Boolean))],
-    [assets]
-  );
   const statuses = useMemo(
     () => [...new Set(assets.map((a) => a.status).filter(Boolean))],
     [assets]
@@ -42,7 +39,10 @@ const AssetRegistry = () => {
   const visibleAssets = useMemo(() => {
     let list = assets.filter(
       (a) =>
-        (!categoryFilter || a.category === categoryFilter) &&
+        (!categoryFilter ||
+          (categoryFilter === OTHER_CATEGORY
+            ? !ASSET_CATEGORIES.includes(a.category)
+            : a.category === categoryFilter)) &&
         (!statusFilter || a.status === statusFilter)
     );
     switch (sortBy) {
@@ -115,9 +115,10 @@ const AssetRegistry = () => {
               className="border border-line rounded-sm px-2 py-1.5 text-sm font-sans focus:outline-none focus:border-brand"
             >
               <option value="">All categories</option>
-              {categories.map((c) => (
+              {ASSET_CATEGORIES.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
+              <option value={OTHER_CATEGORY}>Other</option>
             </select>
             <select
               value={statusFilter}

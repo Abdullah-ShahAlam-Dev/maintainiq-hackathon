@@ -42,8 +42,8 @@ const ManagementTable = ({ title, columns, rows, onStatusChange, onDelete }) => 
                   {col.label}
                 </th>
               ))}
-              <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">Created</th>
-              <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">Approved By</th>
+              <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">Created At</th>
+              <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">Updated By</th>
               <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">Actions</th>
             </tr>
           </thead>

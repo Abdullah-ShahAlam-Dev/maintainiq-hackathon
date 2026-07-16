@@ -30,7 +30,8 @@ const issueSchema = new mongoose.Schema(
     evidenceUrls: { type: [String], default: [] },
     aiSuggested: { type: Boolean, default: false },
     aiEdited: { type: Boolean, default: false },
-    assignedTechnician: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }
+    assignedTechnician: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    assignedBy: { type: String, default: null }, // name of the admin/superadmin who assigned it
   },
   { timestamps: true }
 );

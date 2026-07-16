@@ -124,7 +124,7 @@ const Register = () => {
         <OtpModal
           initialEmail={form.email}
           autoSend={false}
-          durationSeconds={600}
+          durationSeconds={300}
           title="Verify your email"
           onSendOtp={handleResend}
           onVerify={handleVerify}

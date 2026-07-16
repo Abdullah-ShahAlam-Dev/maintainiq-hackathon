@@ -61,11 +61,11 @@ const UserDashboard = () => {
                 </span>
               </div>
               <p className="text-sm text-muted mt-1 mb-0">{issue.description}</p>
-              {issue.assetId && (
-                <p className="text-xs font-mono text-muted mt-1 mb-0">
-                  Asset: {issue.assetId.name} ({issue.assetId.assetCode})
-                </p>
-              )}
+              <p className="text-xs font-mono text-muted mt-1 mb-0">
+                {issue.assetId
+                  ? `Asset: ${issue.assetId.name} (${issue.assetId.assetCode})`
+                  : 'Asset: Asset Removed'}
+              </p>
             </div>
           ))}
           {issues.length === 0 && !error && (

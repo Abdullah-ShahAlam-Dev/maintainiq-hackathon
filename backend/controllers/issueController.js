@@ -3,6 +3,7 @@ const Issue = require('../models/Issue');
 const Asset = require('../models/Asset');
 const MaintenanceRecord = require('../models/MaintenanceRecord');
 const logHistory = require('../utils/logHistory');
+const User = require('../models/User');
 
 // Which issue status can move to which next statuses
 const ALLOWED_TRANSITIONS = {
@@ -123,10 +124,10 @@ const getIssues = async (req, res) => {
     if (assetId) query.assetId = assetId;
     if (reporterEmail) query['reporterInfo.email'] = reporterEmail.toLowerCase().trim();
 
-    const issues = await Issue.find(query)
-      .populate('assetId', 'assetCode name location')
-      .populate('assignedTechnician', 'name email')
-      .sort({ createdAt: -1 });
+const issues = await Issue.find(query)
+  .populate('assetId', 'assetCode name location category qrUrl')
+  .populate('assignedTechnician', 'name email')
+  .sort({ createdAt: -1 });
 
     res.json(issues);
   } catch (err) {
@@ -146,7 +147,7 @@ const getIssueById = async (req, res) => {
   }
 };
 
-// Assign a technician — admin only
+// Assign a technician — admin Or adminstrator
 const assignIssue = async (req, res) => {
   try {
     const { technicianId } = req.body;
@@ -155,7 +156,10 @@ const assignIssue = async (req, res) => {
     const issue = await Issue.findById(req.params.id);
     if (!issue) return res.status(404).json({ message: 'Issue not found' });
 
+    const actor = await User.findById(req.user.id).select('name');
+
     issue.assignedTechnician = technicianId;
+    issue.assignedBy = actor?.name || req.user.name || 'Unknown';
     issue.status = 'Assigned';
     await issue.save();
 
@@ -171,6 +175,7 @@ const assignIssue = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
 
 // Update issue status — technician only, only if assigned to them. Validates transitions.
 const updateIssueStatus = async (req, res) => {
