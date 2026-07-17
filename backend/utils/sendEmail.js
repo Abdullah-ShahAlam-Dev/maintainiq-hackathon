@@ -37,15 +37,32 @@ checkingSMTPEmail.verify((err) => {
 
 const sendOtpEmail = async (mail, otp, purpose = 'account verification') => {
   
-  // creating transporter Local Scope
-  // 1. Transporter ko function ke andar Rakhaa (Har Request = Naya Connection)
-  const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  // // creating transporter Local Scope
+  // // 1. Transporter ko function ke andar Rakhaa (Har Request = Naya Connection)
+
+
+  
+  // const transporter = nodemailer.createTransport({
+  // service: 'gmail',
+  // auth: {
+  //   user: process.env.PORTAL_EMAIL,
+  //   pass: process.env.PORTAL_PASSWORD
+  // }
+
+  const checkingSMTPEmail = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // Port 587 ke liye isko false rakhna zaroori hai
   auth: {
-    user: process.env.PORTAL_EMAIL,
-    pass: process.env.PORTAL_PASSWORD
-  }
+    user: process.env.EMAIL_USER,
+    pass: process.env.PORTAL_PASSWORD,
+  },
 });
+
+
+
+
+
 
 
 const mailOptions = {
