@@ -98,7 +98,7 @@ const OtpModal = ({
         {step === 'email' ? (
           <>
             <p className="text-sm text-ink mb-4">
-              Enter your email — we'll send you a verification code before submitting.
+              Enter your email — we'll send you a verification code before downloading.
             </p>
             <form onSubmit={handleEmailSubmit} className="space-y-3">
               <input
