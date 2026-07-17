@@ -117,9 +117,9 @@ const AssetsTab = () => {
                 </Link>
                 <button
                   onClick={() => generateAssetPoster(asset)}
-                  className="bg-ink hover:bg-black text-white font-mono text-[10px] px-2.5 py-1.5 rounded-sm"
+                  className="bg-success hover:!bg-hazard text-white font-mono text-[10px] px-2.5 py-1.5 rounded-sm"
                 >
-                  Poster
+                  Poster 🡇
                 </button>
               </div>
             </div>
@@ -157,8 +157,8 @@ const AssetsTab = () => {
                       <Link to={`/asset/${asset.assetCode}`} className="font-mono text-[11px] uppercase tracking-tag text-brand">Open →</Link>
                     </td>
                     <td className="px-4 py-2.5 text-sm">
-                      <button onClick={() => generateAssetPoster(asset)} className="bg-ink hover:bg-black text-white font-mono text-[10px] px-2.5 py-1.5 rounded-sm">
-                        Download
+                      <button onClick={() => generateAssetPoster(asset)} className="bg-success hover:!bg-[#23613d] text-white font-mono text-[10px] px-2.5 py-1 rounded-sm">
+                        Download🡇
                       </button>
                     </td>
                   </tr>

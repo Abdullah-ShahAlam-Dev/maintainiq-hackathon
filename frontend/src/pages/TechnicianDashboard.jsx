@@ -100,7 +100,7 @@ const TechnicianDashboard = () => {
 
             {!issue.assetId && !['Resolved', 'Closed'].includes(issue.status) && (
               <p style={{ fontSize: '0.8rem', color: 'var(--muted)', fontStyle: 'italic' }}>
-                This asset has been removed from the registry — no further action is required on this issue.
+                This asset has been removed from the registry by the owner — no further action is required on this issue.
               </p>
             )}
 

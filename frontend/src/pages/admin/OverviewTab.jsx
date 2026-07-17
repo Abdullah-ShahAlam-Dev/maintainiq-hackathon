@@ -15,7 +15,7 @@ const OverviewTab = ({
   onUpdateAsset,
   onDeleteAsset,
 }) => {
-  const [assetView, setAssetView] = useState("card"); // 'card' | 'table'
+  const [assetView, setAssetView] = useState("table"); // 'card' | 'table'
   const [categoryFilter, setCategoryFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [sortBy, setSortBy] = useState("name-asc");
@@ -186,25 +186,25 @@ const OverviewTab = ({
         {/* Toolbar row — Card/Table left, filters + small search right */}
         <div className="flex flex-wrap items-center justify-between gap-3 bg-panel border border-line border-t-0 px-4 py-3">
           <div className="flex gap-2">
-            <button
-              onClick={() => setAssetView("card")}
-              className={`font-mono text-[11px] uppercase tracking-tag px-3 py-1.5 rounded-sm ${
-                assetView === "card"
-                  ? "bg-brand text-white"
-                  : "bg-transparent text-ink border border-line"
-              }`}
-            >
-              Card
-            </button>
-            <button
+                        <button
               onClick={() => setAssetView("table")}
-              className={`font-mono text-[11px] uppercase tracking-tag px-3 py-1.5 rounded-sm ${
+              className={`font-mono text-[11px] hover:!text-white uppercase tracking-tag px-3 py-1.5 rounded-sm ${
                 assetView === "table"
                   ? "bg-brand text-white"
                   : "bg-transparent text-ink border border-line"
               }`}
             >
               Table
+            </button>
+            <button
+              onClick={() => setAssetView("card")}
+              className={`font-mono text-[11px] uppercase tracking-tag px-3 hover:!text-white py-1.5 rounded-sm ${
+                assetView === "card"
+                  ? "bg-brand text-white"
+                  : "bg-transparent text-ink border border-line"
+              }`}
+            >
+              Card
             </button>
           </div>
 
@@ -274,7 +274,7 @@ const OverviewTab = ({
                     <button
                       onClick={() => setEditingAsset(asset)}
                       title="Edit asset"
-                      className="w-6 h-6 flex items-center justify-center rounded-sm bg-ink text-white hover:bg-black text-xs"
+                      className="w-6 h-6 flex items-center justify-center rounded-sm text-white bg-[#1d5a8a] hover:!bg-[#16496d] text-xs"
                     >
                       ✎
                     </button>
@@ -282,7 +282,7 @@ const OverviewTab = ({
                       <button
                         onClick={() => handleDelete(asset)}
                         title="Delete asset"
-                        className="w-6 h-6 flex items-center justify-center rounded-sm bg-critical text-white hover:opacity-90 text-xs"
+                        className="w-6 h-6 flex items-center justify-center rounded-sm bg-critical text-white hover:!bg-[#7d2715] text-xs"
                       >
                         🗑
                       </button>
@@ -330,16 +330,16 @@ const OverviewTab = ({
                       onClick={() =>
                         navigator.clipboard.writeText(`${window.location.origin}/asset/${asset.assetCode}`)
                       }
-                      className="bg-ink hover:bg-black text-white font-mono text-[10px] px-2.5 py-1.5 rounded-sm"
+                      className="bg-green-500 hover:bg-green-600 text-white font-mono text-[10px] px-2.5 py-1.5 rounded-sm"
                     >
                       Copy Link
                     </button> */}
 
                     <button
                       onClick={() => generateAssetPoster(asset)}
-                      className="bg-ink hover:bg-black text-white font-mono text-[10px] px-2.5 py-1.5 rounded-sm"
+                      className="bg-success hover:!bg-hazard text-white font-mono text-[10px] px-2.5 py-1.5 rounded-sm"
                     >
-                      Poster
+                      Poster 🡇
                     </button>
                   </div>
                 </div>
@@ -370,7 +370,7 @@ const OverviewTab = ({
                     <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">
                       Status
                     </th>
-                    <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">
+                    <th className="text-center px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">
                       Actions
                     </th>
                   </tr>
@@ -402,14 +402,14 @@ const OverviewTab = ({
 
                           <button
                             onClick={() => generateAssetPoster(asset)}
-                            className="bg-ink hover:bg-black text-white font-mono text-[10px] px-2.5 py-0.5 rounded-sm"
+                            className="bg-success hover:!bg-[#23613d] text-white font-mono text-[10px] px-0.5 py-0.5 rounded-sm"
                           >
-                            Poster
+                            Poster 🡇
                           </button>
                           <button
                             onClick={() => setEditingAsset(asset)}
                             title="Edit asset"
-                            className="w-6 h-6 flex items-center justify-center rounded-sm bg-ink text-white hover:bg-black text-xs"
+                            className="bg-[#1d5a8a] hover:!bg-[#16496d] w-6 h-6 flex items-center justify-center rounded-sm text-white text-xs"
                           >
                             ✎
                           </button>
@@ -417,7 +417,7 @@ const OverviewTab = ({
                             <button
                               onClick={() => handleDelete(asset)}
                               title="Delete asset"
-                              className="w-6 h-6 flex items-center justify-center rounded-sm bg-critical text-white hover:opacity-90 text-xs"
+                              className="w-6 h-6 flex items-center justify-center rounded-sm bg-critical hover:!bg-[#7d2715] text-white  text-xs"
                             >
                               🗑
                             </button>
