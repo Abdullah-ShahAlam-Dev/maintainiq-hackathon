@@ -54,6 +54,7 @@ const sendOtpEmail = async (mail, otp, purpose = 'account verification') => {
   host: "smtp.gmail.com",
   port: 587,
   secure: false, // Port 587 ke liye isko false rakhna zaroori hai
+  family:4,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.PORTAL_PASSWORD,
