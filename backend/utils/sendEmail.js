@@ -41,7 +41,7 @@ const sendOtpEmail = async (mail, otp, purpose = 'account verification') => {
   // // 1. Transporter ko function ke andar Rakhaa (Har Request = Naya Connection)
 
 
-  
+
   // const transporter = nodemailer.createTransport({
   // service: 'gmail',
   // auth: {
@@ -49,7 +49,7 @@ const sendOtpEmail = async (mail, otp, purpose = 'account verification') => {
   //   pass: process.env.PORTAL_PASSWORD
   // }
 
-  const checkingSMTPEmail = nodemailer.createTransport({
+  const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
   secure: false, // Port 587 ke liye isko false rakhna zaroori hai
