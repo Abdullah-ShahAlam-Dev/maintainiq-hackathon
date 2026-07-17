@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import { ASSET_CATEGORIES, OTHER_CATEGORY } from '../constants/categories';
+import { isLoggedIn } from '../utils/auth';
+import { generateAssetPoster } from '../utils/generateAssetPoster';
+import OtpModal from '../components/OtpModal';
 
 const STATUS_CLASS = {
   Operational: 'text-success border-success',
@@ -23,6 +26,13 @@ const AssetRegistry = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [sortBy, setSortBy] = useState('name-asc');
   const [error, setError] = useState('');
+
+  // Guest poster download — logged-in visitors skip straight to the PDF,
+  // guests must verify their email via OTP first (same flow as reporting an
+  // issue). pendingAsset holds whichever card's download icon was clicked
+  // while the modal is open.
+  const [pendingAsset, setPendingAsset] = useState(null);
+  const loggedIn = isLoggedIn();
 
   useEffect(() => {
     api
@@ -59,9 +69,35 @@ const AssetRegistry = () => {
     return list;
   }, [assets, categoryFilter, statusFilter, sortBy]);
 
+  const handlePosterClick = (asset) => {
+    if (loggedIn) {
+      generateAssetPoster(asset);
+    } else {
+      setPendingAsset(asset);
+    }
+  };
+
+  const handleSendOtp = async (email) => {
+    try {
+      await api.post('/public/otp/send', { email });
+    } catch (err) {
+      throw new Error(err.response?.data?.message || 'Failed to send OTP');
+    }
+  };
+
+  const handleVerifyOtp = async (otp, email) => {
+    try {
+      await api.post('/public/otp/verify', { email, otp });
+      generateAssetPoster(pendingAsset);
+      setPendingAsset(null);
+    } catch (err) {
+      throw new Error(err.response?.data?.message || 'Verification failed');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-base font-sans text-ink">
-      <header className="bg-ink text-white border-b-[3px] border-hazard">
+      <header className="bg-ink text-white border-b-[5px] border-hazard">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <h1 className="font-mono text-sm uppercase tracking-tag m-0">MaintainIQ</h1>
           <Link
@@ -163,12 +199,20 @@ const AssetRegistry = () => {
                 {asset.qrUrl && (
                   <img src={asset.qrUrl} alt="Scan to open asset page" width="110" className="block mb-2" />
                 )}
-                <Link
-                  to={`/asset/${asset.assetCode}`}
-                  className="font-mono text-[11px] uppercase tracking-tag text-brand"
-                >
-                  Open Public Page →
-                </Link>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <Link
+                    to={`/asset/${asset.assetCode}`}
+                    className="font-mono text-[11px] uppercase tracking-tag text-brand"
+                  >
+                    Open Public Page →
+                  </Link>
+                  <button
+                    onClick={() => handlePosterClick(asset)}
+                    className="bg-ink hover:bg-black text-white font-mono text-[10px] px-2.5 py-1.5 rounded-sm"
+                  >
+                    Poster
+                  </button>
+                </div>
               </div>
             ))}
             {visibleAssets.length === 0 && !error && (
@@ -188,6 +232,7 @@ const AssetRegistry = () => {
                     <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">Status</th>
                     <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">QR</th>
                     <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">View</th>
+                    <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">Poster</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -210,11 +255,19 @@ const AssetRegistry = () => {
                           Open →
                         </Link>
                       </td>
+                      <td className="px-4 py-2.5 text-sm">
+                        <button
+                          onClick={() => handlePosterClick(asset)}
+                          className="bg-ink hover:bg-black text-white font-mono text-[10px] px-2.5 py-1.5 rounded-sm"
+                        >
+                          Download
+                        </button>
+                      </td>
                     </tr>
                   ))}
                   {visibleAssets.length === 0 && !error && (
                     <tr>
-                      <td colSpan={7} className="px-4 py-6 text-sm text-muted text-center">No assets match these filters.</td>
+                      <td colSpan={8} className="px-4 py-6 text-sm text-muted text-center">No assets match these filters.</td>
                     </tr>
                   )}
                 </tbody>
@@ -223,6 +276,18 @@ const AssetRegistry = () => {
           </div>
         )}
       </main>
+
+      {pendingAsset && (
+        <OtpModal
+          initialEmail=""
+          autoSend={false}
+          durationSeconds={120}
+          title="Verify your email to download"
+          onSendOtp={handleSendOtp}
+          onVerify={handleVerifyOtp}
+          onClose={() => setPendingAsset(null)}
+        />
+      )}
     </div>
   );
 };
