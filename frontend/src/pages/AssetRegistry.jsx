@@ -128,7 +128,7 @@ const AssetRegistry = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setView('card')}
-              className={`font-mono text-[11px] uppercase tracking-tag px-3 py-1.5 rounded-sm ${
+              className={`font-mono text-[11px] uppercase tracking-tag px-3 py-1.5 hover:!text-white rounded-sm ${
                 view === 'card' ? 'bg-brand text-white' : 'bg-transparent text-ink border border-line'
               }`}
             >
@@ -136,7 +136,7 @@ const AssetRegistry = () => {
             </button>
             <button
               onClick={() => setView('table')}
-              className={`font-mono text-[11px] uppercase tracking-tag px-3 py-1.5 rounded-sm ${
+              className={`font-mono text-[11px] uppercase tracking-tag px-3 py-1.5 hover:!text-white rounded-sm ${
                 view === 'table' ? 'bg-brand text-white' : 'bg-transparent text-ink border border-line'
               }`}
             >
