@@ -249,7 +249,7 @@ const UserDashboard = () => {
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <h1 className="font-mono text-sm uppercase tracking-tag m-0">MaintainIQ / My Account</h1>
           <div className="flex items-center gap-4 font-mono text-sm">
-            <span>{user?.name}</span>
+            <span>USER {user?.name}</span>
             <button
               onClick={() => { logout(); navigate('/login'); }}
               className="bg-transparent border border-white/30 hover:bg-white/10 text-white font-mono text-xs uppercase tracking-tag px-3 py-1.5 rounded-sm"
