@@ -204,7 +204,7 @@ const AssetRegistry = () => {
                     to={`/asset/${asset.assetCode}`}
                     className="font-mono text-[11px] uppercase tracking-tag text-brand"
                   >
-                    Open Public Page →
+                    View Details
                   </Link>
                   <button
                     onClick={() => handlePosterClick(asset)}

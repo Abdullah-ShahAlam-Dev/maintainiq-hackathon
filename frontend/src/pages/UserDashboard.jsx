@@ -113,7 +113,7 @@ const AssetsTab = () => {
               {asset.qrUrl && <img src={asset.qrUrl} alt="QR code" width="110" className="block mb-2" />}
               <div className="flex items-center gap-3 flex-wrap">
                 <Link to={`/asset/${asset.assetCode}`} className="font-mono text-[11px] uppercase tracking-tag text-brand">
-                  Open Public Page →
+                  View Details
                 </Link>
                 <button
                   onClick={() => generateAssetPoster(asset)}
