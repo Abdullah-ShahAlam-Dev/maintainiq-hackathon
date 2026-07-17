@@ -1,23 +1,23 @@
 const nodemailer = require('nodemailer');
 //Global Scope for SMTP connection
-// const checkingSMTPEmail = nodemailer.createTransport({
-//   service: 'gmail',
-//   auth: {
-//     user: process.env.PORTAL_EMAIL,
-//     pass: process.env.PORTAL_PASSWORD
-//   }
-// });
-
 const checkingSMTPEmail = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // Port 587 ke liye isko false rakhna zaroori hai
-  family: 4,
+  service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.PORTAL_PASSWORD,
-  },
+    user: process.env.PORTAL_EMAIL,
+    pass: process.env.PORTAL_PASSWORD
+  }
 });
+
+// const checkingSMTPEmail = nodemailer.createTransport({
+//   host: "smtp.gmail.com",
+//   port: 587,
+//   secure: false, // Port 587 ke liye isko false rakhna zaroori hai
+//   family: 4,
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.PORTAL_PASSWORD,
+//   },
+// });
 
 // Verify the SMTP connection once at startup so config problems (wrong
 // password, App Password not set up, etc.) show up immediately in the logs
