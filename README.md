@@ -10,10 +10,10 @@
 - **Frontend (Live):** [https://maintainiq-frontend.vercel.app](https://maintainiq-frontend.vercel.app)
 - **Backend API (Live):** [https://maintainiq-hackathon.onrender.com](https://maintainiq-hackathon.onrender.com)
 - **Demo Credentials:**
-  - **Super Admin:*username:abdullahdev@maintainiq.com && password:abdullahdev123*
-  - **Administrator:*username:abdullahdshahalam2003@gmail.com && password:12345678*
-  - **Super Admin:*username:it@maintainiq && password:123456*
-  - **User Account:*username:Users3@MaintainIQ.com && password:123456*
+  - **Super Admin:*username: abdullahdev@maintainiq.com && password:abdullahdev123*
+  - **Administrator:*username: abdullahdshahalam2003@gmail.com && password:12345678*
+  - **Super Admin:*username: it@maintainiq && password:123456*
+  - **User Account:*username: Users3@MaintainIQ.com && password:123456*
   - **Public User:*Just need To verify OTP via email to check Authentic Complain Reports/Downloading feature of system.*
   - *(Feel free to register a new User or Technician or adminstrator account via the `/register` page using the OTP flow).*
   You can access your account once Super ADMIN will aproved your request 
