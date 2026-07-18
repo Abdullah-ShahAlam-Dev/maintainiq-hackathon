@@ -26,6 +26,7 @@ const AdminDashboard = () => {
 
   const [activeTab, setActiveTab] = useState("overview");
 
+  const [assetImage, setAssetImage] = useState(null);
   const [assets, setAssets] = useState([]);
   const [issues, setIssues] = useState([]);
   const [technicians, setTechnicians] = useState([]);
@@ -68,7 +69,13 @@ const AdminDashboard = () => {
     e.preventDefault();
     setError("");
     try {
-      await api.post("/assets", form);
+      const payload = new FormData();
+      Object.entries(form).forEach(([key, value]) =>
+        payload.append(key, value),
+      );
+      if (assetImage) payload.append("image", assetImage);
+
+      await api.post("/assets", payload);
       setForm({
         assetCode: "",
         name: "",
@@ -76,6 +83,7 @@ const AdminDashboard = () => {
         location: "",
         condition: "Good",
       });
+      setAssetImage(null);
       loadData();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create asset");
@@ -92,8 +100,13 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleUpdateAsset = async (assetId, updates) => {
-    await api.put(`/assets/${assetId}`, updates);
+  const handleUpdateAsset = async (assetId, updates, imageFile) => {
+    const payload = new FormData();
+    Object.entries(updates).forEach(([key, value]) =>
+      payload.append(key, value),
+    );
+    if (imageFile) payload.append("image", imageFile);
+    await api.put(`/assets/${assetId}`, payload);
     loadData();
   };
 
@@ -170,6 +183,7 @@ const AdminDashboard = () => {
             search={search}
             onSearchChange={setSearch}
             isSuperAdmin={isSuperAdmin}
+            onImageChange={setAssetImage}
             onUpdateAsset={handleUpdateAsset}
             onDeleteAsset={handleDeleteAsset}
           />

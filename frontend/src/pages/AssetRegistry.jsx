@@ -1,18 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import api from '../api/axios';
-import { ASSET_CATEGORIES, OTHER_CATEGORY } from '../constants/categories';
-import { isLoggedIn } from '../utils/auth';
-import { generateAssetPoster } from '../utils/generateAssetPoster';
-import OtpModal from '../components/OtpModal';
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import api from "../api/axios";
+import { ASSET_CATEGORIES, OTHER_CATEGORY } from "../constants/categories";
+import { isLoggedIn } from "../utils/auth";
+import { generateAssetPoster } from "../utils/generateAssetPoster";
+import OtpModal from "../components/OtpModal";
 
 const STATUS_CLASS = {
-  Operational: 'text-success border-success',
-  'Issue Reported': 'text-hazard border-hazard',
-  'Under Inspection': 'text-[#1d5a8a] border-[#1d5a8a]',
-  'Under Maintenance': 'text-[#1d5a8a] border-[#1d5a8a]',
-  'Out of Service': 'text-critical border-critical',
-  Retired: 'text-critical border-critical'
+  Operational: "text-success border-success",
+  "Issue Reported": "text-hazard border-hazard",
+  "Under Inspection": "text-[#1d5a8a] border-[#1d5a8a]",
+  "Under Maintenance": "text-[#1d5a8a] border-[#1d5a8a]",
+  "Out of Service": "text-critical border-critical",
+  Retired: "text-critical border-critical",
 };
 
 // Public landing page ("/") — mirrors the Admin Overview tab's UX (table/card
@@ -20,12 +20,12 @@ const STATUS_CLASS = {
 // and the QR codes ARE shown here since scanning them is the whole point.
 const AssetRegistry = () => {
   const [assets, setAssets] = useState([]);
-  const [search, setSearch] = useState('');
-  const [view, setView] = useState('card'); // 'card' | 'table'
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [sortBy, setSortBy] = useState('name-asc');
-  const [error, setError] = useState('');
+  const [search, setSearch] = useState("");
+  const [view, setView] = useState("card"); // 'card' | 'table'
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [sortBy, setSortBy] = useState("name-asc");
+  const [error, setError] = useState("");
 
   // Guest poster download — logged-in visitors skip straight to the PDF,
   // guests must verify their email via OTP first (same flow as reporting an
@@ -36,14 +36,14 @@ const AssetRegistry = () => {
 
   useEffect(() => {
     api
-      .get('/public/assets', { params: search ? { search } : {} })
+      .get("/public/assets", { params: search ? { search } : {} })
       .then((res) => setAssets(res.data))
-      .catch(() => setError('Failed to load asset registry'));
+      .catch(() => setError("Failed to load asset registry"));
   }, [search]);
 
   const statuses = useMemo(
     () => [...new Set(assets.map((a) => a.status).filter(Boolean))],
-    [assets]
+    [assets],
   );
 
   const visibleAssets = useMemo(() => {
@@ -53,16 +53,16 @@ const AssetRegistry = () => {
           (categoryFilter === OTHER_CATEGORY
             ? !ASSET_CATEGORIES.includes(a.category)
             : a.category === categoryFilter)) &&
-        (!statusFilter || a.status === statusFilter)
+        (!statusFilter || a.status === statusFilter),
     );
     switch (sortBy) {
-      case 'name-desc':
+      case "name-desc":
         list = [...list].sort((a, b) => b.name.localeCompare(a.name));
         break;
-      case 'status':
+      case "status":
         list = [...list].sort((a, b) => a.status.localeCompare(b.status));
         break;
-      case 'name-asc':
+      case "name-asc":
       default:
         list = [...list].sort((a, b) => a.name.localeCompare(b.name));
     }
@@ -79,19 +79,19 @@ const AssetRegistry = () => {
 
   const handleSendOtp = async (email) => {
     try {
-      await api.post('/public/otp/send', { email });
+      await api.post("/public/otp/send", { email });
     } catch (err) {
-      throw new Error(err.response?.data?.message || 'Failed to send OTP');
+      throw new Error(err.response?.data?.message || "Failed to send OTP");
     }
   };
 
   const handleVerifyOtp = async (otp, email) => {
     try {
-      await api.post('/public/otp/verify', { email, otp });
+      await api.post("/public/otp/verify", { email, otp });
       generateAssetPoster(pendingAsset);
       setPendingAsset(null);
     } catch (err) {
-      throw new Error(err.response?.data?.message || 'Verification failed');
+      throw new Error(err.response?.data?.message || "Verification failed");
     }
   };
 
@@ -99,7 +99,9 @@ const AssetRegistry = () => {
     <div className="min-h-screen bg-base font-sans text-ink">
       <header className="bg-ink text-white border-b-[5px] border-hazard">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="font-mono text-sm uppercase tracking-tag m-0">MaintainIQ</h1>
+          <h1 className="font-mono text-sm uppercase tracking-tag m-0">
+            MaintainIQ
+          </h1>
           <Link
             to="/login"
             className="bg-brand hover:bg-brand-dark text-white font-mono text-xs uppercase tracking-tag px-4 py-2 rounded-sm"
@@ -127,17 +129,21 @@ const AssetRegistry = () => {
         <div className="flex flex-wrap items-center justify-between gap-3 bg-panel border border-line rounded-sm px-4 py-3 mb-5">
           <div className="flex gap-2">
             <button
-              onClick={() => setView('card')}
+              onClick={() => setView("card")}
               className={`font-mono text-[11px] uppercase tracking-tag px-3 py-1.5 hover:!text-white rounded-sm ${
-                view === 'card' ? 'bg-brand text-white' : 'bg-transparent text-ink border border-line'
+                view === "card"
+                  ? "bg-brand text-white"
+                  : "bg-transparent text-ink border border-line"
               }`}
             >
               Card
             </button>
             <button
-              onClick={() => setView('table')}
+              onClick={() => setView("table")}
               className={`font-mono text-[11px] uppercase tracking-tag px-3 py-1.5 hover:!text-white rounded-sm ${
-                view === 'table' ? 'bg-brand text-white' : 'bg-transparent text-ink border border-line'
+                view === "table"
+                  ? "bg-brand text-white"
+                  : "bg-transparent text-ink border border-line"
               }`}
             >
               Table
@@ -152,7 +158,9 @@ const AssetRegistry = () => {
             >
               <option value="">All categories</option>
               {ASSET_CATEGORIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c} value={c}>
+                  {c}
+                </option>
               ))}
               <option value={OTHER_CATEGORY}>Other</option>
             </select>
@@ -163,7 +171,9 @@ const AssetRegistry = () => {
             >
               <option value="">All statuses</option>
               {statuses.map((s) => (
-                <option key={s} value={s}>{s}</option>
+                <option key={s} value={s}>
+                  {s}
+                </option>
               ))}
             </select>
             <select
@@ -178,7 +188,7 @@ const AssetRegistry = () => {
           </div>
         </div>
 
-        {view === 'card' ? (
+        {view === "card" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {visibleAssets.map((asset) => (
               <div
@@ -191,14 +201,28 @@ const AssetRegistry = () => {
                 </p>
                 <span
                   className={`inline-block mt-2 mb-2 px-2 py-0.5 rounded-sm border text-[10px] font-mono font-bold uppercase tracking-tag ${
-                    STATUS_CLASS[asset.status] || 'text-muted border-muted'
+                    STATUS_CLASS[asset.status] || "text-muted border-muted"
                   }`}
                 >
                   {asset.status}
                 </span>
-                {asset.qrUrl && (
-                  <img src={asset.qrUrl} alt="Scan to open asset page" width="110" className="block mb-2" />
-                )}
+                <div className="flex gap-3 mt-2 mb-2">
+                  {asset.imageUrl && (
+                    <img
+                      src={asset.imageUrl}
+                      alt={asset.name}
+                      className="w-24 h-24 object-cover rounded-sm border border-line flex-shrink-0"
+                    />
+                  )}
+                  {asset.qrUrl && (
+                    <img
+                      src={asset.qrUrl}
+                      alt="Scan to open asset page"
+                      width="90"
+                      className="flex-shrink-0"
+                    />
+                  )}
+                </div>
                 <div className="flex items-center gap-3 flex-wrap">
                   <Link
                     to={`/asset/${asset.assetCode}`}
@@ -208,7 +232,6 @@ const AssetRegistry = () => {
                   </Link>
                   <button
                     onClick={() => handlePosterClick(asset)}
-                    
                     className="bg-success hover:!bg-hazard text-white font-mono text-[10px] px-2.5 py-1.5 rounded-sm"
                   >
                     Poster 🡇
@@ -217,7 +240,9 @@ const AssetRegistry = () => {
               </div>
             ))}
             {visibleAssets.length === 0 && !error && (
-              <p className="text-sm text-muted col-span-full">No assets match these filters.</p>
+              <p className="text-sm text-muted col-span-full">
+                No assets match these filters.
+              </p>
             )}
           </div>
         ) : (
@@ -226,33 +251,62 @@ const AssetRegistry = () => {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-ink text-white">
-                    <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">Name</th>
-                    <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">Code</th>
-                    <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">Category</th>
-                    <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">Location</th>
-                    <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">Status</th>
-                    <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">QR</th>
-                    <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">View</th>
-                    <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">Poster</th>
+                    <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">
+                      Name
+                    </th>
+                    <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">
+                      Code
+                    </th>
+                    <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">
+                      Category
+                    </th>
+                    <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">
+                      Location
+                    </th>
+                    <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">
+                      Status
+                    </th>
+                    <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">
+                      QR
+                    </th>
+                    <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">
+                      View
+                    </th>
+                    <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">
+                      Poster
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {visibleAssets.map((asset) => (
                     <tr key={asset._id} className="border-b border-line">
                       <td className="px-4 py-2.5 text-sm">{asset.name}</td>
-                      <td className="px-4 py-2.5 text-sm font-mono">{asset.assetCode}</td>
-                      <td className="px-4 py-2.5 text-sm text-muted">{asset.category}</td>
-                      <td className="px-4 py-2.5 text-sm text-muted">{asset.location}</td>
+                      <td className="px-4 py-2.5 text-sm font-mono">
+                        {asset.assetCode}
+                      </td>
+                      <td className="px-4 py-2.5 text-sm text-muted">
+                        {asset.category}
+                      </td>
+                      <td className="px-4 py-2.5 text-sm text-muted">
+                        {asset.location}
+                      </td>
                       <td className="px-4 py-2.5 text-sm">
-                        <span className={`inline-block px-2 py-0.5 rounded-sm border text-[10px] font-mono font-bold uppercase tracking-tag ${STATUS_CLASS[asset.status] || 'text-muted border-muted'}`}>
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded-sm border text-[10px] font-mono font-bold uppercase tracking-tag ${STATUS_CLASS[asset.status] || "text-muted border-muted"}`}
+                        >
                           {asset.status}
                         </span>
                       </td>
                       <td className="px-4 py-2.5">
-                        {asset.qrUrl && <img src={asset.qrUrl} alt="QR" width="48" />}
+                        {asset.qrUrl && (
+                          <img src={asset.qrUrl} alt="QR" width="48" />
+                        )}
                       </td>
                       <td className="px-4 py-2.5 text-sm">
-                        <Link to={`/asset/${asset.assetCode}`} className="font-mono text-[11px] uppercase tracking-tag text-brand">
+                        <Link
+                          to={`/asset/${asset.assetCode}`}
+                          className="font-mono text-[11px] uppercase tracking-tag text-brand"
+                        >
                           Open →
                         </Link>
                       </td>
@@ -268,7 +322,12 @@ const AssetRegistry = () => {
                   ))}
                   {visibleAssets.length === 0 && !error && (
                     <tr>
-                      <td colSpan={8} className="px-4 py-6 text-sm text-muted text-center">No assets match these filters.</td>
+                      <td
+                        colSpan={8}
+                        className="px-4 py-6 text-sm text-muted text-center"
+                      >
+                        No assets match these filters.
+                      </td>
                     </tr>
                   )}
                 </tbody>

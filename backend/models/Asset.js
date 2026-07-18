@@ -22,7 +22,8 @@ const assetSchema = new mongoose.Schema(
     lastServiceDate: { type: Date, default: null },
     nextServiceDate: { type: Date, default: null },
     assignedTechnician: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
-    qrUrl: { type: String, default: null }
+    qrUrl: { type: String, default: null },
+    imageUrl: { type: String, default: null } // Cloudinary photo of the physical asset
   },
   { timestamps: true }
 );

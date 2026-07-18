@@ -1,8 +1,19 @@
 const QRCode = require('qrcode');
 const Asset = require('../models/Asset');
 const logHistory = require('../utils/logHistory');
+const cloudinary = require('../config/cloudinary');
+
+const uploadAssetImage = (buffer) =>
+  new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'maintainiq-assets' },
+      (error, result) => (result ? resolve(result) : reject(error))
+    );
+    stream.end(buffer);
+  });
 
 // Create asset — admin only. Also generates QR code pointing to public asset page.
+// req.file (optional) is the asset's photo, uploaded via multer memoryStorage.
 const createAsset = async (req, res) => {
   try {
     const { assetCode, name, category, location, condition, nextServiceDate } = req.body;
@@ -19,6 +30,12 @@ const createAsset = async (req, res) => {
     const publicUrl = `${process.env.FRONTEND_URL}/asset/${assetCode.trim()}`;
     const qrUrl = await QRCode.toDataURL(publicUrl);
 
+    let imageUrl = null;
+    if (req.file) {
+      const result = await uploadAssetImage(req.file.buffer);
+      imageUrl = result.secure_url;
+    }
+
     const asset = await Asset.create({
       assetCode: assetCode.trim(),
       name,
@@ -26,7 +43,8 @@ const createAsset = async (req, res) => {
       location,
       condition,
       nextServiceDate: nextServiceDate || null,
-      qrUrl
+      qrUrl,
+      imageUrl
     });
 
     await logHistory({
@@ -97,7 +115,7 @@ const getPublicAssets = async (req, res) => {
     }
 
     const assets = await Asset.find(query)
-      .select('assetCode name category location status qrUrl')
+      .select('assetCode name category location status qrUrl imageUrl')
       .sort({ createdAt: -1 });
 
     res.json(assets);
@@ -110,7 +128,7 @@ const getPublicAssets = async (req, res) => {
 const getPublicAsset = async (req, res) => {
   try {
     const asset = await Asset.findOne({ assetCode: req.params.code }).select(
-      'assetCode name category location condition status lastServiceDate nextServiceDate'
+      'assetCode name category location condition status lastServiceDate nextServiceDate imageUrl'
     );
     if (!asset) return res.status(404).json({ message: 'Asset not found' });
     res.json(asset);
@@ -119,9 +137,16 @@ const getPublicAsset = async (req, res) => {
   }
 };
 
+// req.file (optional) replaces the existing image if a new one is uploaded.
 const updateAsset = async (req, res) => {
   try {
     const { assetCode, ...updates } = req.body;
+
+    if (req.file) {
+      const result = await uploadAssetImage(req.file.buffer);
+      updates.imageUrl = result.secure_url;
+    }
+
     const asset = await Asset.findByIdAndUpdate(req.params.id, updates, { new: true });
     if (!asset) return res.status(404).json({ message: 'Asset not found' });
 

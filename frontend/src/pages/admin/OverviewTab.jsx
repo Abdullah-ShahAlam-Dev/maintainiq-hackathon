@@ -5,6 +5,7 @@ import { generateAssetPoster } from "../../utils/generateAssetPoster";
 
 const OverviewTab = ({
   assets,
+  onImageChange,
   issues,
   form,
   onFormChange,
@@ -172,6 +173,13 @@ const OverviewTab = ({
             onChange={onFormChange}
             className="flex-1 min-w-[120px] border border-line rounded-sm px-3 py-2 text-sm font-sans focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
           />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => onImageChange(e.target.files[0])}
+            className="flex-1 min-w-[160px] text-sm"
+          />
+
           <button
             type="submit"
             className="bg-brand hover:bg-brand-dark text-white font-mono text-xs font-semibold uppercase tracking-tag px-5 py-2 rounded-sm transition-colors"
@@ -186,7 +194,7 @@ const OverviewTab = ({
         {/* Toolbar row — Card/Table left, filters + small search right */}
         <div className="flex flex-wrap items-center justify-between gap-3 bg-panel border border-line border-t-0 px-4 py-3">
           <div className="flex gap-2">
-                        <button
+            <button
               onClick={() => setAssetView("table")}
               className={`font-mono text-[11px] hover:!text-white uppercase tracking-tag px-3 py-1.5 rounded-sm ${
                 assetView === "table"
@@ -309,14 +317,26 @@ const OverviewTab = ({
                   >
                     {asset.status}
                   </span>
-                  {asset.qrUrl && (
-                    <img
-                      src={asset.qrUrl}
-                      alt="QR code"
-                      width="90"
-                      className="mt-1"
-                    />
-                  )}
+
+                  <div className="flex gap-3 mt-2 mb-1">
+                    {asset.imageUrl && (
+                      <img
+                        src={asset.imageUrl}
+                        alt={asset.name}
+                        className="w-24 h-24 object-cover rounded-sm border border-line flex-shrink-0"
+                      />
+                    )}
+                    {asset.qrUrl && (
+                      <img
+                        src={asset.qrUrl}
+                        alt="QR code"
+                        width="90"
+                        className="flex-shrink-0"
+                      />
+                    )}
+                  </div>
+
+                  
                   <div className="flex gap-2 mt-2 flex-wrap">
                     <a
                       href={`/asset/${asset.assetCode}`}

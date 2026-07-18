@@ -1,43 +1,107 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import api from '../api/axios';
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import api from "../api/axios";
 
 const PublicAssetPage = () => {
   const { code } = useParams();
   const [asset, setAsset] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     api
       .get(`/public/asset/${code}`)
       .then((res) => setAsset(res.data))
-      .catch(() => setError('Asset not found'));
+      .catch(() => setError("Asset not found"));
   }, [code]);
 
-  if (error) return <div className="public-page"><p className="error-text">{error}</p></div>;
-  if (!asset) return <div className="public-page"><p>Loading...</p></div>;
+  if (error)
+    return (
+      <div className="public-page">
+        <p className="error-text">{error}</p>
+      </div>
+    );
+  if (!asset)
+    return (
+      <div className="public-page">
+        <p>Loading...</p>
+      </div>
+    );
 
   return (
     <div className="public-page">
-      <div className="public-card">
-        <h1>{asset.name}</h1>
-        <p className="asset-code">{asset.assetCode}</p>
-        <span className={`status-badge status-${asset.status.replace(/\s/g, '')}`}>{asset.status}</span>
+      <div
+        className="public-card"
+        style={{
+          display: "flex",
+          flexDirection: "row",           // <-- Explicitly forces left-to-right layout
+          justifyContent: "space-between", // <-- Pushes text to left and image to right
+          flexWrap: "wrap-reverse",
+          gap: "1.25rem",
+          alignItems: "center",
+         maxWidth: "700px",             
+          width: "100%",
+        }}
+      >
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h1>{asset.name}</h1>
+          <p className="asset-code">{asset.assetCode}</p>
+          <span
+            className={`status-badge status-${asset.status.replace(/\s/g, "")}`}
+          >
+            {asset.status}
+          </span>
 
-        <div className="asset-details">
-          <p><strong>Category:</strong> {asset.category}</p>
-          <p><strong>Location:</strong> {asset.location}</p>
-          <p><strong>Condition:</strong> {asset.condition}</p>
-          {asset.lastServiceDate && <p><strong>Last Service:</strong> {new Date(asset.lastServiceDate).toLocaleDateString()}</p>}
-          {asset.nextServiceDate && <p><strong>Next Service:</strong> {new Date(asset.nextServiceDate).toLocaleDateString()}</p>}
+          <div className="asset-details">
+            <p>
+              <strong>Category:</strong> {asset.category}
+            </p>
+            <p>
+              <strong>Location:</strong> {asset.location}
+            </p>
+            <p>
+              <strong>Condition:</strong> {asset.condition}
+            </p>
+            {asset.lastServiceDate && (
+              <p>
+                <strong>Last Service:</strong>{" "}
+                {new Date(asset.lastServiceDate).toLocaleDateString()}
+              </p>
+            )}
+            {asset.nextServiceDate && (
+              <p>
+                <strong>Next Service:</strong>{" "}
+                {new Date(asset.nextServiceDate).toLocaleDateString()}
+              </p>
+            )}
+          </div>
+
+          {asset.status === "Retired" ? (
+            <p className="retired-note">
+              This asset has been retired and is no longer in active use.
+            </p>
+          ) : (
+            <Link to={`/report/${asset.assetCode}`} className="report-btn">
+              Report an Issue
+            </Link>
+          )}
         </div>
 
-        {asset.status === 'Retired' ? (
-          <p className="retired-note">This asset has been retired and is no longer in active use.</p>
-        ) : (
-          <Link to={`/report/${asset.assetCode}`} className="report-btn">Report an Issue</Link>
+          {asset.imageUrl && (
+          <img
+            src={asset.imageUrl}
+            alt={asset.name}
+            style={{
+              width: "330px",
+              height: "220px",
+              objectFit: "cover",
+              borderRadius: "4px",
+              border: "1px solid var(--border)",
+              flexShrink: 0,
+            }}
+          />
         )}
-      </div>
+
+</div>
     </div>
   );
 };

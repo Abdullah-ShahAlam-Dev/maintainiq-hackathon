@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { ASSET_CATEGORIES, OTHER_CATEGORY } from '../../constants/categories';
 
 // Opened from a card/row's Edit icon. Pre-filled with the asset's current
-// values; onSave(assetId, updates) is expected to PUT to the backend and
-// refresh the parent's asset list.
+// values; onSave(assetId, updates, imageFile) is expected to PUT to the
+// backend (multipart if a new image was picked) and refresh the parent's list.
 const AssetEditModal = ({ asset, onSave, onClose }) => {
   const [form, setForm] = useState({
     name: asset.name || '',
@@ -14,6 +14,8 @@ const AssetEditModal = ({ asset, onSave, onClose }) => {
   const [showCustomCategory, setShowCustomCategory] = useState(
     Boolean(asset.category) && !ASSET_CATEGORIES.includes(asset.category)
   );
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(asset.imageUrl || null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -30,12 +32,19 @@ const AssetEditModal = ({ asset, onSave, onClose }) => {
     }
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSaving(true);
     try {
-      await onSave(asset._id, form);
+      await onSave(asset._id, form, imageFile);
       onClose();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update asset');
@@ -46,13 +55,26 @@ const AssetEditModal = ({ asset, onSave, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/70 px-4">
-      <div className="bg-panel border-t-4 border-hazard rounded-sm w-full max-w-md p-6 shadow-2xl">
+      <div className="bg-panel border-t-4 border-hazard rounded-sm w-full max-w-md p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
         <h2 className="font-mono text-xs uppercase tracking-tag text-muted m-0 mb-1">Edit Asset</h2>
         <p className="text-sm text-ink mb-4">
           <span className="font-mono">{asset.assetCode}</span>
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-3">
+          {imagePreview && (
+            <img src={imagePreview} alt="Asset preview" className="w-full h-40 object-cover rounded-sm border border-line" />
+          )}
+          <label className="block text-xs font-mono uppercase tracking-tag text-muted">
+            Asset Photo
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="block w-full mt-1 text-sm"
+            />
+          </label>
+
           <input
             name="name"
             placeholder="Name"
