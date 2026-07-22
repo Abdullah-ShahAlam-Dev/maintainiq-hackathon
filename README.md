@@ -134,7 +134,7 @@ npm install
 #   SUPER_ADMIN_EMAIL=
 #   SUPER_ADMIN_PASSWORD=
 #   SENDGRID_API_KEY=
-#   SENDGRID_FROM_EMAIL=        # must match your SendGrid verified single sender
+#   SENDGRID_FROM_EMAIL=
 #   OPENROUTER_API_KEY=
 #   CLOUDINARY_CLOUD_NAME=
 #   CLOUDINARY_API_KEY=
