@@ -11,7 +11,7 @@ const sendOtpEmail = async (mail, otp, purpose = 'account verification') => {
   const msg = {
     to: mail,
     from: process.env.SENDGRID_FROM_EMAIL, // must be the exact verified single sender address
-    subject: 'MaintainIQ — OTP Verification',
+    subject: 'Maintain-IQ — OTP Verification',
     text: `Your OTP for ${purpose} is: ${otp}\n\nThis code expires shortly. If you did not request this, you can ignore this email.`
   };
 

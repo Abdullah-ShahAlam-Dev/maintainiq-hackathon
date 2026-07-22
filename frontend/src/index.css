@@ -115,7 +115,7 @@ textarea:focus {
       rgba(20, 24, 31, 0.28) 42%,
       rgba(20, 24, 31, 0.72) 100%
     ),
-    url("./assets/bg-login.png") center / cover no-repeat;
+    url("./assets/bg-login.png") center bottom  / cover no-repeat;
   background-attachment: fixed;
 }
 @media (max-width: 700px) {
@@ -136,7 +136,7 @@ textarea:focus {
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 255, 255, 0.45);
-  border-top: 4px solid var(--hazard);
+  border-top: 6px solid var(--hazard);
   box-shadow: 0 28px 70px rgba(0, 0, 0, 0.45);
 }
 .auth-card h2 {
@@ -165,7 +165,7 @@ textarea:focus {
   color: white;
   margin: 0 -1.5rem 2rem;
   padding: 1.1rem 1.5rem;
-  border-bottom: 3px solid var(--hazard);
+  border-bottom: 5px solid var(--hazard);
 }
 .dashboard-header h1 {
   font-family: var(--mono);

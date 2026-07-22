@@ -1,108 +1,190 @@
 # MaintainIQ
 
-**AI-Powered QR Maintenance & Asset Management Platform**
-*Scan. Report. Diagnose. Maintain.*
+**AI-Powered QR Maintenance & Asset History Platform with Enterprise RBAC**
+Scan. Report. Diagnose. Maintain.
+
+Built for the SMIT Final Hackathon — Track A (Advanced Full-Stack + GenAI). Originally submitted as a MERN CRUD app; substantially upgraded post-submission with a full role-based access control system, dual OTP verification, cookie-based auth, and a redesigned admin experience.
 
 ---
 
-## 🚀 Live Links & Demo
+## Live Links
 
-- **Frontend (Live):** [https://maintainiq-frontend.vercel.app](https://maintainiq-frontend.vercel.app)
-- **Backend API (Live):** [https://maintainiq-hackathon.onrender.com](https://maintainiq-hackathon.onrender.com)
-- **Demo Credentials:**
-  - **Super Admin:*username: abdullahdev@maintainiq.com && password:abdullahdev123*
-  - **Administrator:*username: abdullahdshahalam2003@gmail.com && password:12345678*
-  - **Super Admin:*username: it@maintainiq && password:123456*
-  - **User Account:*username: Users3@MaintainIQ.com && password:123456*
-  - **Public User:*Just need To verify OTP via email to check Authentic Complain Reports/Downloading feature of system.*
-  - *(Feel free to register a new User or Technician or adminstrator account via the `/register` page using the OTP flow).*
-  You can access your account once Super ADMIN will aproved your request 
-
-> **Note:** The backend is deployed on Render's free tier. The first request may take 20–30 seconds to wake up from a cold start.
+- **Frontend:** https://maintainiq-frontend.vercel.app
+- **Backend API:** https://maintainiq-hackathon.onrender.com *(Render free tier — first request after inactivity can take 20–50s to wake up)*
 
 ---
 
-## 💡 Project Overview
+## Overview
 
-MaintainIQ is a comprehensive facility and asset management platform designed to replace manual registers and WhatsApp complaints. It gives every physical asset (ACs, projectors, medical equipment) a digital identity via a unique QR code. 
+MaintainIQ gives every physical asset (projector, AC, camera, etc.) a digital identity: a unique asset code, a QR-accessible public page, an AI-assisted issue reporting flow, a controlled maintenance workflow, and a permanent, exportable service history. It's built for schools, hospitals, offices, and facility-management teams who currently track maintenance across registers, phone calls, and WhatsApp.
 
-When a user scans the QR code, they can view safe public details and report issues. The platform uses **Generative AI** to instantly triage the complaint (suggesting causes and initial checks) before routing it through a strict, role-based maintenance workflow. 
-
-**This project demonstrates advanced full-stack capabilities including Cookie-based JWT Auth, strict Role-Based Access Control (RBAC), AI integration, PDF generation, and complex database relationships.**
+The QR code is only the entry point — the real product value is in role-based approvals, issue triage, technician assignment, maintenance records, and full audit history.
 
 ---
 
-## 🛠️ Comprehensive Tech Stack
+## Key Features
 
-### Frontend
-- **Framework:** React.js (Vite)
-- **Styling:** Tailwind CSS & Custom CSS
-- **Routing:** React Router DOM
-- **PDF Generation:** `jspdf` (for generating Asset QR Posters and Issue History Reports)
-- **QR Generation:** `qrcode` npm package
+### Authentication & Access Control
+- **Cookie-based JWT** (httpOnly, environment-aware `secure`/`sameSite`) — no tokens in localStorage
+- **Four-tier role hierarchy**: `superadmin` (seeded once via env vars) → `admin` → `technician` → `user`
+- **Approval workflow**: technician/admin signups stay `pending` until reviewed; `user` accounts auto-approve
+- **Dual OTP verification**:
+  - *Signup OTP* — verifies email before an account can be used
+  - *Guest report OTP* — lets anonymous visitors report an issue without creating an account, gated by a 2-minute email OTP
+  - Both flows share one reusable 2-step `<OtpModal/>` component with a live countdown and resend
 
-### Backend & Database
-- **Runtime & Framework:** Node.js, Express.js
-- **Database:** MongoDB with Mongoose (Complex schemas with population and aggregations)
-- **Architecture:** MVC (Model-View-Controller) Pattern
+### Admin Dashboard (role-aware, 6 tabs)
+- **Overview** — asset registry (card/table toggle, category/status filters, sort, search), asset creation, edit, and delete (delete restricted to Super Admin, enforced server-side)
+- **Approvals** — pending technician/admin signups; Super Admin sees both, Admin sees technicians only; certification documents viewable inline
+- **Issue Management** — card/table toggle, category/status/sort filters, technician assignment (approved technicians only), full **Issue History Report** PDF export (reporter info, asset snapshot, assignment trail, timeline, maintenance notes)
+- **Administrators / Technicians / Users** — management tables with a Granted/Revoked toggle and a Delete action that's disabled until an account is revoked (enforced server-side, not just the UI)
 
-### Security, Auth & Roles
-- **Authentication:** HttpOnly Cookie-based JWT (Secure, SameSite configurations for production)
-- **Authorization:** Custom Middleware enforcing strict RBAC (Super Admin, Admin, Technician, User)
-- **Verification:** Dual OTP System (Nodemailer/Resend) for Signup verification and Guest Issue Reporting.
+### Asset Management
+- Full CRUD: create, edit (popup modal), and delete (Super Admin only)
+- Auto-generated QR code linking to the public asset page
+- Optional asset photo upload (Cloudinary) — shown alongside the QR on every card
+- Downloadable branded **Asset Poster** (PDF) from the public registry, the admin dashboard, or a logged-in user's own dashboard
+- Deleting an asset never deletes its issue history — related issues are preserved and clearly marked **"Asset Removed"** everywhere they're referenced (Issue Management, Technician dashboard, User dashboard), and are excluded from the live "Open Issues" counters since they're no longer actionable
 
-### Cloud Integrations & AI
-- **Generative AI:** OpenRouter API (Multi-model fallback chain for AI Issue Triage)
-- **Media Storage:** Cloudinary (For Asset images and maintenance evidence)
-- **Deployment:** Vercel (Frontend) & Render (Backend)
+### Issue Reporting & Triage
+- **AI Issue Triage** — converts a natural-language complaint into a structured, editable suggestion (title, category, priority, possible causes, initial checks) via a multi-model OpenRouter fallback chain
+- Guest reporting requires OTP email verification; logged-in users bypass it entirely
+- Controlled status workflow: `Reported → Assigned → Inspection Started → Maintenance In Progress → Resolved → Closed/Reopened`, enforced server-side with no skipped transitions
+- A maintenance note is required before an issue can be marked Resolved
 
----
+### User Dashboard
+- **Assets** tab — same registry experience as the public page, poster download without re-verifying
+- **My Reported Issues** tab — status of every issue the user has filed, plus the technician's latest maintenance note
 
-## 🔥 Core Features & System Architecture
-
-### 1. Advanced Role-Based Access Control (RBAC)
-- **Super Admin:** Full system control, including permanent asset deletion and user management.
-- **Admin:** Can register assets, generate reports, approve pending signups, and assign issues.
-- **Technician:** Restricted access; can only view and update issues explicitly assigned to them.
-- **User/Guest:** Can scan QR codes, view public safe-data, and report issues (secured via OTP).
-
-### 2. Smart Asset Management & QR Code Posters
-- Complete CRUD operations for physical assets.
-- System automatically generates a unique QR code linked to a safe public URL.
-- **Print-Ready Exports:** Admins can download a branded A5 PDF Poster for each asset containing the QR code, asset details, and scanning instructions.
-
-### 3. AI Issue Triage
-- Converts a user's natural-language complaint (e.g., "AC is making noise and leaking") into structured data.
-- Automatically suggests a professional Title, Category, Priority, Possible Causes, and Safe Initial Checks.
-- Users can review and edit AI suggestions before final submission.
-
-### 4. Robust Maintenance Workflow & Data Integrity
-- Strict server-side validation for status transitions (Reported → Assigned → Inspection Started → Maintenance In Progress → Resolved).
-- Cannot resolve an issue without adding a maintenance note.
-- **Graceful Orphaned Data Handling:** If a Super Admin deletes an asset, its related issues are not permanently lost. They are preserved as historical records and labeled as *"Asset Removed"* in the dashboards.
-
-### 5. Permanent Asset History & PDF Reporting
-- Every meaningful action (status change, assignment, maintenance entry) is automatically logged with the actor, action, and timestamp.
-- **Downloadable Reports:** Admins can generate a complete PDF lifecycle report of any issue, detailing reporter info, AI suggestions, technician notes, and status timelines.
+### Shared Category System
+- A single source of truth (`constants/categories.js`) drives every category dropdown across asset creation, issue reporting, and all filters — including an "Other" custom-entry option — so a typo in one place can no longer fragment filtering everywhere else
 
 ---
 
-## 📂 Project Structure
+## Tech Stack
 
-```text
-MaintainIQ/
+| Layer | Technology |
+|---|---|
+| Frontend | React (Vite), Tailwind CSS, React Router |
+| Backend | Node.js, Express |
+| Database | MongoDB + Mongoose |
+| Auth | JWT via httpOnly cookies, bcrypt, role-based middleware |
+| Email/OTP | Twilio SendGrid (Single Sender Verification) |
+| AI | OpenRouter (multi-model fallback chain) for Issue Triage |
+| QR Codes | `qrcode` npm package |
+| PDF Generation | `jsPDF` — asset posters and full issue history reports |
+| Media Storage | Cloudinary (technician certifications, asset photos) |
+| Deployment | Vercel (frontend) + Render (backend) |
+
+---
+
+## Business Rules Enforced Server-Side
+
+- Duplicate asset codes rejected
+- No skipping issue status transitions
+- Cannot resolve an issue without a maintenance note
+- Maintenance cost cannot be negative
+- Closed issues are locked until reopened
+- Only a `superadmin` can approve/revoke/delete another `admin` account
+- Only a revoked account can be deleted (button-disabled client-side **and** rejected server-side)
+- Only `superadmin` can delete an asset; edit is available to `admin` and `superadmin`
+- Guest issue reports require a valid, unexpired OTP-derived token; logged-in reports are trusted via session cookie
+
+---
+
+## Project Structure
+
+```
+Final Hackathon/
 ├── backend/
-│   ├── config/           # DB, Cloudinary, and SuperAdmin Seed configs
-│   ├── controllers/      # Business logic (Auth, Assets, Issues, AI, Public OTP)
-│   ├── middleware/       # Cookie-auth, Role checks, Optional Auth, File uploads
-│   ├── models/           # Mongoose Schemas (User, Asset, Issue, History, GuestOtp)
-│   ├── routes/           # Express API endpoints
-│   ├── utils/            # Shared utilities (History Logger, generateOtp, sendEmail)
-│   └── server.js         # Entry point
+│   ├── config/          # DB, Cloudinary, Super Admin seeding
+│   ├── controllers/     # auth, asset, issue, maintenance, ai, history, upload, publicAuth
+│   ├── middleware/      # cookie-JWT auth, optional-auth, role hierarchy, file upload
+│   ├── models/           # User, Asset, Issue, MaintenanceRecord, History, GuestOtp
+│   ├── routes/            # Express routers
+│   ├── utils/              # OTP generator, SendGrid email, history logger
+│   └── server.js
 └── frontend/
     └── src/
-        ├── api/          # Axios instance (configured withCredentials for cookies)
-        ├── components/   # Reusable UI (OtpModal, ProtectedRoutes)
-        ├── pages/        # Role-specific Dashboards, Public Registry, Report Issue
-        ├── utils/        # Client-side Auth state management
-        └── App.jsx       # Route definitions
+        ├── api/            # Axios instance (cookie-based, withCredentials)
+        ├── components/     # OtpModal, ProtectedRoute
+        ├── constants/      # Shared category list
+        ├── utils/           # Auth helpers, asset poster generator
+        ├── pages/
+        │   ├── admin/       # Dashboard tabs, management table, edit modal
+        │   ├── AdminDashboard, TechnicianDashboard, UserDashboard
+        │   ├── AssetRegistry (public "/"), PublicAssetPage, ReportIssue
+        │   └── Login, Register
+        └── App.jsx
+```
+
+---
+
+## Running Locally
+
+### Backend
+```bash
+cd backend
+npm install
+# create a .env file with:
+#   MONGODB_URI=
+#   JWT_SECRET=
+#   PORT=5000
+#   FRONTEND_URL=http://localhost:5173
+#   SUPER_ADMIN_EMAIL=
+#   SUPER_ADMIN_PASSWORD=
+#   SENDGRID_API_KEY=
+#   SENDGRID_FROM_EMAIL=        # must match your SendGrid verified single sender
+#   OPENROUTER_API_KEY=
+#   CLOUDINARY_CLOUD_NAME=
+#   CLOUDINARY_API_KEY=
+#   CLOUDINARY_API_SECRET=
+node server.js
+```
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+> `NODE_ENV=production` is set automatically by Render — don't set it locally, since cookie behavior (`secure`/`sameSite`) depends on its absence in development.
+
+---
+
+## API Overview
+
+| Method | Endpoint | Access |
+|---|---|---|
+| POST | `/api/auth/register` | Public (starts signup OTP flow) |
+| POST | `/api/auth/verify-otp` | Public |
+| POST | `/api/auth/login` / `/logout` | Public / Logged in |
+| GET | `/api/auth/pending` | Admin, Super Admin |
+| GET | `/api/auth/list` | Admin, Super Admin |
+| PUT | `/api/auth/:id/status` | Admin, Super Admin |
+| DELETE | `/api/auth/:id` | Admin, Super Admin (admin accounts: Super Admin only) |
+| POST/GET/PUT/DELETE | `/api/assets` | Logged in (delete: Super Admin only) |
+| GET | `/api/public/assets`, `/api/public/asset/:code` | Public |
+| POST | `/api/public/otp/send`, `/otp/verify` | Public (guest reporting) |
+| POST | `/api/issues` | Public (OTP-gated) / Logged in (bypass) |
+| GET/PUT | `/api/issues` | Logged in |
+| POST | `/api/maintenance` | Admin, Technician |
+| GET | `/api/history/:assetId`, `/history/issue/:issueId` | Logged in |
+| POST | `/api/ai/triage` | Public |
+| POST | `/api/upload` | Logged in (Cloudinary evidence upload) |
+
+---
+
+## Known Limitations
+
+- No automated test suite
+- Issue History Report PDF export is Admin-only (not surfaced to Technician/User dashboards)
+- "My Reported Issues" has no search/filter yet
+- Asset deletion is permanent (no soft-delete/restore)
+
+---
+
+## AI Usage Disclosure
+
+AI assistance (Claude) was used extensively throughout development — initial scaffolding, the RBAC/OTP/cookie-auth architecture redesign, debugging (SMTP deliverability, deployment/DNS issues, race conditions), and structuring the AI Issue Triage prompt. All architecture decisions, business logic, and final implementation were reviewed, tested, and understood by the developer.

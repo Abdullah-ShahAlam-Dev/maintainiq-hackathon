@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
 import { getUser, logout } from '../utils/auth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link} from 'react-router-dom';
+
 
 const NEXT_STATUS = {
   Assigned: 'Inspection Started',
@@ -69,7 +70,23 @@ const TechnicianDashboard = () => {
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>MaintainIQ — Technician</h1>
+            <h1 className="font-mono text-base uppercase tracking-tag m-0">
+               <Link
+              to="/"
+              className="text-inherit no-underline hover:opacity-90 transition"
+            >
+              MaintainIQ
+            </Link>
+            {" "}
+            <span
+              className="text-hazard font-sans font-black inline-block mx-1"
+              style={{ WebkitTextStroke: "3px" }}
+            >
+              /
+            </span>{" "}
+            Technician
+          </h1>
+
         <div>
           <span>{user?.name}</span>
           <button onClick={() => { logout(); navigate('/login'); }}>Logout</button>

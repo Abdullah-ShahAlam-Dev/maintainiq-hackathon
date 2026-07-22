@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { ASSET_CATEGORIES, OTHER_CATEGORY } from "../constants/categories";
-import { isLoggedIn } from "../utils/auth";
 import { generateAssetPoster } from "../utils/generateAssetPoster";
 import OtpModal from "../components/OtpModal";
+import { isLoggedIn, getUser, logout } from "../utils/auth";
 
 const STATUS_CLASS = {
   Operational: "text-success border-success",
@@ -19,6 +19,8 @@ const STATUS_CLASS = {
 // toggle, category/status filters, sort) but read-only: no add-asset form,
 // and the QR codes ARE shown here since scanning them is the whole point.
 const AssetRegistry = () => {
+  const user = getUser();
+  const navigate = useNavigate();
   const [assets, setAssets] = useState([]);
   const [search, setSearch] = useState("");
   const [view, setView] = useState("card"); // 'card' | 'table'
@@ -26,7 +28,16 @@ const AssetRegistry = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [sortBy, setSortBy] = useState("name-asc");
   const [error, setError] = useState("");
-
+  const roleLabel =
+    user?.role === "superadmin"
+      ? "Super Admin"
+      : user?.role === "admin"
+        ? "Administrator"
+        : user?.role === "technician"
+          ? "Technician"
+          : user?.role === "user"
+            ? "User"
+            : "Guest";
   // Guest poster download — logged-in visitors skip straight to the PDF,
   // guests must verify their email via OTP first (same flow as reporting an
   // issue). pendingAsset holds whichever card's download icon was clicked
@@ -99,15 +110,48 @@ const AssetRegistry = () => {
     <div className="min-h-screen bg-base font-sans text-ink">
       <header className="bg-ink text-white border-b-[5px] border-hazard">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="font-mono text-sm uppercase tracking-tag m-0">
-            MaintainIQ
+          <h1 className="font-mono text-base uppercase tracking-tag m-0">
+            <Link
+              to="/"
+              className="text-inherit no-underline hover:opacity-90 transition"
+            >
+              MaintainIQ
+            </Link>{" "}
+            <span
+              className="text-hazard font-sans font-black inline-block mx-1"
+              style={{ WebkitTextStroke: "3px" }}
+            >
+              /
+            </span>{" "}
+            {/* User */}
+            {roleLabel}
           </h1>
-          <Link
+
+          {/* <Link
             to="/login"
-            className="bg-brand hover:bg-brand-dark text-white font-mono text-xs uppercase tracking-tag px-4 py-2 rounded-sm"
+            className="bg-hazard hover:bg-[#b35f00] text-white font-mono text-xs uppercase tracking-tag px-6 py-2 rounded-sm"
           >
             Login
-          </Link>
+          </Link> */}
+
+          {user ? (
+            <button
+              onClick={async () => {
+                await logout();
+                navigate("/login");
+              }}
+              className="bg-brand border border-white/30 hover:bg-white/10 text-white font-mono text-xs uppercase tracking-tag px-6 py-3 rounded-sm"
+            >
+              Logout
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              className="bg-hazard hover:bg-[#b35f00] text-white font-mono text-xs uppercase tracking-tag px-6 py-2 rounded-sm"
+            >
+              Login
+            </Link>
+          )}
         </div>
       </header>
 
@@ -130,20 +174,20 @@ const AssetRegistry = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setView("card")}
-              className={`font-mono text-[11px] uppercase tracking-tag px-3 py-1.5 hover:!text-white rounded-sm ${
+              className={`font-mono text-[11px] uppercase tracking-tag px-3 py-1.5  rounded-sm ${
                 view === "card"
                   ? "bg-brand text-white"
-                  : "bg-transparent text-ink border border-line"
+                  : "bg-transparent text-ink border border-line hover:text-white"
               }`}
             >
               Card
             </button>
             <button
               onClick={() => setView("table")}
-              className={`font-mono text-[11px] uppercase tracking-tag px-3 py-1.5 hover:!text-white rounded-sm ${
+              className={`font-mono text-[11px] uppercase tracking-tag px-3 py-1.5  rounded-sm ${
                 view === "table"
                   ? "bg-brand text-white"
-                  : "bg-transparent text-ink border border-line"
+                  : "bg-transparent text-ink border border-line hover:text-white"
               }`}
             >
               Table
@@ -273,7 +317,7 @@ const AssetRegistry = () => {
                       View
                     </th>
                     <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">
-                      Poster
+                      Download
                     </th>
                   </tr>
                 </thead>
@@ -315,7 +359,7 @@ const AssetRegistry = () => {
                           onClick={() => handlePosterClick(asset)}
                           className="bg-success hover:!bg-[#23613d] text-white font-mono text-[10px] px-2.5 py-1 rounded-sm"
                         >
-                          Download🡇
+                          Poster🡇
                         </button>
                       </td>
                     </tr>

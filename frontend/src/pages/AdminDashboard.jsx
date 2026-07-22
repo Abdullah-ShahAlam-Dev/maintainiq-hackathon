@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import { getUser, logout } from "../utils/auth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import OverviewTab from "./admin/OverviewTab";
 import ApprovalsTab from "./admin/ApprovalsTab";
 import IssueManagementTab from "./admin/IssueManagementTab";
@@ -119,8 +119,14 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-base font-sans text-ink">
       <header className="bg-ink text-white border-b-[5px] border-hazard">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="font-mono text-sm uppercase tracking-tag m-0">
-            MaintainIQ{" "}
+          <h1 className="font-mono text-base uppercase tracking-tag m-0">
+            <Link
+              to="/"
+              className="text-inherit no-underline hover:opacity-90 transition"
+            >
+              MaintainIQ
+            </Link>
+            {" "}
             <span
               className="text-hazard font-sans font-black inline-block mx-1"
               style={{ WebkitTextStroke: "3px" }}
@@ -136,7 +142,7 @@ const AdminDashboard = () => {
                 logout();
                 navigate("/login");
               }}
-              className="bg-transparent border border-white/30 hover:bg-white/10 text-white font-mono text-xs uppercase tracking-tag px-3 py-1.5 rounded-sm"
+              className="bg-brand border border-white/30 hover:bg-white/10 text-white font-mono text-xs uppercase tracking-tag px-6 py-3 rounded-sm"
             >
               Logout
             </button>
@@ -152,7 +158,7 @@ const AdminDashboard = () => {
                 onClick={() => setActiveTab(tab.key)}
                 className={`border relative whitespace-nowrap font-mono text-xs uppercase tracking-tag px-5 py-3 rounded-t-sm border border-b-0 transition-colors ${
                   isActive
-                    ? "bg-base text-ink border-line"
+                    ? "bg-base text-ink border-line hover:text-white"
                     : "bg-transparent text-white/60 border-transparent hover:text-white"
                 }`}
               >
@@ -161,7 +167,7 @@ const AdminDashboard = () => {
                 )}
 
                 {!isActive && (
-                  <span className="absolute top-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-brand opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span className="absolute top-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white opacity-0 group-hover:opacity-100 transition-opacity" />
                 )}
                 <span className="mt-1 block">{tab.label}</span>
               </button>

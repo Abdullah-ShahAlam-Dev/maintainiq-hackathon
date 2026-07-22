@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import api from '../api/axios';
-import { isLoggedIn, getUser } from '../utils/auth';
-import OtpModal from '../components/OtpModal';
-import { ASSET_CATEGORIES, OTHER_CATEGORY } from '../constants/categories';
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import api from "../api/axios";
+import { isLoggedIn, getUser } from "../utils/auth";
+import OtpModal from "../components/OtpModal";
+import { ASSET_CATEGORIES, OTHER_CATEGORY } from "../constants/categories";
 
 const ReportIssue = () => {
   const { code } = useParams();
@@ -12,63 +12,72 @@ const ReportIssue = () => {
   const user = getUser();
 
   const [asset, setAsset] = useState(null);
-  const [complaint, setComplaint] = useState('');
-  const [reporterName, setReporterName] = useState(loggedIn ? user?.name || '' : '');
+  const [complaint, setComplaint] = useState("");
+  const [reporterName, setReporterName] = useState(
+    loggedIn ? user?.name || "" : "",
+  );
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSuggested, setAiSuggested] = useState(false);
   const [aiEdited, setAiEdited] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [showCustomCategory, setShowCustomCategory] = useState(false);
-
+  const role = user?.role;
   const [fields, setFields] = useState({
-    title: '',
-    category: '',
-    priority: 'Medium',
-    possibleCauses: '',
-    initialChecks: ''
+    title: "",
+    category: "",
+    priority: "Medium",
+    possibleCauses: "",
+    initialChecks: "",
   });
 
   useEffect(() => {
-    api.get(`/public/asset/${code}`).then((res) => setAsset(res.data)).catch(() => setError('Asset not found'));
+    api
+      .get(`/public/asset/${code}`)
+      .then((res) => setAsset(res.data))
+      .catch(() => setError("Asset not found"));
   }, [code]);
 
   const runAiTriage = async () => {
     if (!complaint.trim()) {
-      setError('Describe the problem first');
+      setError("Describe the problem first");
       return;
     }
-    setError('');
+    setError("");
     setAiLoading(true);
     try {
-      const res = await api.post('/ai/triage', {
+      const res = await api.post("/ai/triage", {
         assetType: asset?.category,
         assetCondition: asset?.condition,
         assetLocation: asset?.location,
-        complaint
+        complaint,
       });
 
       if (res.data.aiUnavailable) {
-        setError('AI suggestion unavailable right now — please fill the fields manually below');
+        setError(
+          "AI suggestion unavailable right now — please fill the fields manually below",
+        );
       } else {
-        const aiCategory = res.data.category || '';
+        const aiCategory = res.data.category || "";
         setFields({
-          title: res.data.title || '',
+          title: res.data.title || "",
           category: aiCategory,
-          priority: res.data.priority || 'Medium',
-          possibleCauses: (res.data.possibleCauses || []).join(', '),
-          initialChecks: (res.data.initialChecks || []).join(', ')
+          priority: res.data.priority || "Medium",
+          possibleCauses: (res.data.possibleCauses || []).join(", "),
+          initialChecks: (res.data.initialChecks || []).join(", "),
         });
         // If the AI's suggested category isn't one of our fixed options,
         // fall back to "Other" and keep the AI's wording in the custom box
         // instead of silently dropping it or forcing a mismatch.
-        setShowCustomCategory(Boolean(aiCategory) && !ASSET_CATEGORIES.includes(aiCategory));
+        setShowCustomCategory(
+          Boolean(aiCategory) && !ASSET_CATEGORIES.includes(aiCategory),
+        );
         setAiSuggested(true);
         setAiEdited(false);
       }
     } catch (err) {
-      setError('AI suggestion failed — please fill the fields manually below');
+      setError("AI suggestion failed — please fill the fields manually below");
     } finally {
       setAiLoading(false);
     }
@@ -83,24 +92,24 @@ const ReportIssue = () => {
     const value = e.target.value;
     if (value === OTHER_CATEGORY) {
       setShowCustomCategory(true);
-      handleFieldChange('category', '');
+      handleFieldChange("category", "");
     } else {
       setShowCustomCategory(false);
-      handleFieldChange('category', value);
+      handleFieldChange("category", value);
     }
   };
 
   const submitIssue = async (email, reportToken) => {
-    await api.post('/issues', {
+    await api.post("/issues", {
       assetCode: code,
       title: fields.title,
       description: complaint,
       category: fields.category,
       priority: fields.priority,
-      reporterInfo: { name: reporterName || 'Anonymous', email: email || '' },
+      reporterInfo: { name: reporterName || "Anonymous", email: email || "" },
       aiSuggested,
       aiEdited,
-      reportToken
+      reportToken,
     });
     setSubmitted(true);
   };
@@ -110,10 +119,12 @@ const ReportIssue = () => {
   // opens the modal for guests; logged-in users skip straight to submission.
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (!fields.title || !fields.category) {
-      setError('Title and category are required — run AI suggestion or fill manually');
+      setError(
+        "Title and category are required — run AI suggestion or fill manually",
+      );
       return;
     }
 
@@ -121,7 +132,7 @@ const ReportIssue = () => {
       try {
         await submitIssue(user?.email, null);
       } catch (err) {
-        setError(err.response?.data?.message || 'Failed to submit issue');
+        setError(err.response?.data?.message || "Failed to submit issue");
       }
       return;
     }
@@ -131,19 +142,19 @@ const ReportIssue = () => {
 
   const handleSendOtp = async (email) => {
     try {
-      await api.post('/public/otp/send', { email });
+      await api.post("/public/otp/send", { email });
     } catch (err) {
-      throw new Error(err.response?.data?.message || 'Failed to send OTP');
+      throw new Error(err.response?.data?.message || "Failed to send OTP");
     }
   };
 
   const handleVerifyOtp = async (otp, email) => {
     try {
-      const res = await api.post('/public/otp/verify', { email, otp });
+      const res = await api.post("/public/otp/verify", { email, otp });
       await submitIssue(email, res.data.reportToken);
       setShowOtp(false);
     } catch (err) {
-      throw new Error(err.response?.data?.message || 'Verification failed');
+      throw new Error(err.response?.data?.message || "Verification failed");
     }
   };
 
@@ -153,7 +164,25 @@ const ReportIssue = () => {
         <div className="public-card">
           <h2>Thanks for reporting!</h2>
           <p>We will resolve it ASAP.</p>
-          <button onClick={() => navigate(`/asset/${code}`)}>Back to Asset Page</button>
+          {/* <button onClick={() => navigate(`/asset/${code}`)}>Back to Asset Page</button> */}
+          {/* <button onClick={() => navigate(user ? "/user" : "/")}>
+            Back to Asset Asset Registry
+          </button> */}
+          <button
+            onClick={() =>
+              navigate(
+                role === "user"
+                  ? "/user"
+                  : role === "technician"
+                    ? "/technician"
+                    : role === "admin" || role === "superadmin"
+                      ? "/admin"
+                      : "/",
+              )
+            }
+          >
+            Back to Asset Asset Registry
+          </button>
         </div>
       </div>
     );
@@ -163,7 +192,11 @@ const ReportIssue = () => {
     <div className="public-page">
       <div className="public-card">
         <h1>Report an Issue</h1>
-        {asset && <p>Asset: <strong>{asset.name}</strong> ({asset.assetCode})</p>}
+        {asset && (
+          <p>
+            Asset: <strong>{asset.name}</strong> ({asset.assetCode})
+          </p>
+        )}
         {error && <p className="error-text">{error}</p>}
 
         {!loggedIn && (
@@ -182,18 +215,28 @@ const ReportIssue = () => {
         />
 
         <button type="button" onClick={runAiTriage} disabled={aiLoading}>
-          {aiLoading ? 'Analyzing...' : 'Get AI Suggestion'}
+          {aiLoading ? "Analyzing..." : "Get AI Suggestion"}
         </button>
 
         <form onSubmit={handleSubmit} className="issue-form">
           <label>Title</label>
-          <input value={fields.title} onChange={(e) => handleFieldChange('title', e.target.value)} required />
+          <input
+            value={fields.title}
+            onChange={(e) => handleFieldChange("title", e.target.value)}
+            required
+          />
 
           <label>Category</label>
-          <select value={showCustomCategory ? OTHER_CATEGORY : fields.category} onChange={handleCategorySelect} required>
+          <select
+            value={showCustomCategory ? OTHER_CATEGORY : fields.category}
+            onChange={handleCategorySelect}
+            required
+          >
             <option value="">Select category...</option>
             {ASSET_CATEGORIES.map((c) => (
-              <option key={c} value={c}>{c}</option>
+              <option key={c} value={c}>
+                {c}
+              </option>
             ))}
             <option value={OTHER_CATEGORY}>{OTHER_CATEGORY}</option>
           </select>
@@ -201,13 +244,16 @@ const ReportIssue = () => {
             <input
               placeholder="Specify category"
               value={fields.category}
-              onChange={(e) => handleFieldChange('category', e.target.value)}
+              onChange={(e) => handleFieldChange("category", e.target.value)}
               required
             />
           )}
 
           <label>Priority</label>
-          <select value={fields.priority} onChange={(e) => handleFieldChange('priority', e.target.value)}>
+          <select
+            value={fields.priority}
+            onChange={(e) => handleFieldChange("priority", e.target.value)}
+          >
             <option>Low</option>
             <option>Medium</option>
             <option>High</option>
@@ -215,12 +261,24 @@ const ReportIssue = () => {
           </select>
 
           <label>Possible Causes (AI suggested — editable)</label>
-          <textarea value={fields.possibleCauses} onChange={(e) => handleFieldChange('possibleCauses', e.target.value)} rows={2} />
+          <textarea
+            value={fields.possibleCauses}
+            onChange={(e) =>
+              handleFieldChange("possibleCauses", e.target.value)
+            }
+            rows={2}
+          />
 
           <label>Initial Checks (AI suggested — editable)</label>
-          <textarea value={fields.initialChecks} onChange={(e) => handleFieldChange('initialChecks', e.target.value)} rows={2} />
+          <textarea
+            value={fields.initialChecks}
+            onChange={(e) => handleFieldChange("initialChecks", e.target.value)}
+            rows={2}
+          />
 
-          <button type="submit">{loggedIn ? 'Submit Issue' : 'Submit Issue'}</button>
+          <button type="submit">
+            {loggedIn ? "Submit Issue" : "Submit Issue"}
+          </button>
         </form>
       </div>
 

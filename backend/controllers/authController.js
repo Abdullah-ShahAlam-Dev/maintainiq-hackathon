@@ -5,18 +5,18 @@ const cloudinary = require('../config/cloudinary');
 const generateOtp = require('../utils/generateOtp');
 const { sendOtpEmail } = require('../utils/sendEmail');
 
-const SIGNUP_OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const SIGNUP_OTP_TTL_MS = 10 * 60 * 500; // 5 minutes
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: true, // required for cross-site cookies (frontend/backend on different domains)
   sameSite: 'none',
-  maxAge: 7 * 24 * 60 * 60 * 1000
+  maxAge: 1 * 24 * 60 * 60 * 1000
 };
 
 const generateToken = (user) =>
   jwt.sign({ id: user._id, role: user.role, name: user.name }, process.env.JWT_SECRET, {
-    expiresIn: '7d'
+    expiresIn: '1d'
   });
 
 const uploadEvidence = (buffer) =>

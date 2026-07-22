@@ -20,6 +20,7 @@ export const logout = async () => {
     // ignore — clearing local state below is what matters for the UI
   }
   localStorage.removeItem('user');
+  localStorage.removeItem('token'); // legacy cleanup — no longer used, but old browsers may still have it
 };
 
 // Heuristic only — the actual gate is the server checking the cookie on

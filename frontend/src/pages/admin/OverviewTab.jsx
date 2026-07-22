@@ -117,13 +117,19 @@ const OverviewTab = ({
           </h2>
         </div>
         <form onSubmit={onCreateAsset} className="p-5 flex flex-wrap gap-3">
+             <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => onImageChange(e.target.files[0])}
+            className="flex-1 min-w-[205px] text-sm"
+          />
           <input
             name="assetCode"
-            placeholder="Asset Code (e.g. PROJ-01)"
+            placeholder="Asset Code(e.g. PROJ-01)"
             value={form.assetCode}
             onChange={onFormChange}
             required
-            className="flex-1 min-w-[160px] border border-line rounded-sm px-3 py-2 text-sm font-sans focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+            className="flex-1 min-w-[188px] border border-line rounded-sm px-3 py-2 text-sm font-sans focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
           />
           <input
             name="name"
@@ -131,7 +137,7 @@ const OverviewTab = ({
             value={form.name}
             onChange={onFormChange}
             required
-            className="flex-1 min-w-[160px] border border-line rounded-sm px-3 py-2 text-sm font-sans focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+            className="flex-1 min-w-[140px] border border-line rounded-sm px-3 py-2 text-sm font-sans focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
           />
           <select
             name="category"
@@ -140,7 +146,7 @@ const OverviewTab = ({
             required
             className="flex-1 min-w-[140px] border border-line rounded-sm px-3 py-2 text-sm font-sans focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
           >
-            <option value="">Select category...</option>
+            <option value="">Select Category...</option>
             {ASSET_CATEGORIES.map((c) => (
               <option key={c} value={c}>
                 {c}
@@ -164,21 +170,16 @@ const OverviewTab = ({
             value={form.location}
             onChange={onFormChange}
             required
-            className="flex-1 min-w-[140px] border border-line rounded-sm px-3 py-2 text-sm font-sans focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+            className="flex-1 min-w-[110px] border border-line rounded-sm px-3 py-2 text-sm font-sans focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
           />
           <input
             name="condition"
             placeholder="Condition"
             value={form.condition}
             onChange={onFormChange}
-            className="flex-1 min-w-[120px] border border-line rounded-sm px-3 py-2 text-sm font-sans focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+            className="flex-1 min-w-[100px] border border-line rounded-sm px-3 py-2 text-sm font-sans focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
           />
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => onImageChange(e.target.files[0])}
-            className="flex-1 min-w-[160px] text-sm"
-          />
+       
 
           <button
             type="submit"
@@ -196,20 +197,20 @@ const OverviewTab = ({
           <div className="flex gap-2">
             <button
               onClick={() => setAssetView("table")}
-              className={`font-mono text-[11px] hover:!text-white uppercase tracking-tag px-3 py-1.5 rounded-sm ${
+              className={`font-mono text-[11px] uppercase tracking-tag px-3 py-1.5 rounded-sm ${
                 assetView === "table"
                   ? "bg-brand text-white"
-                  : "bg-transparent text-ink border border-line"
+                  : "bg-transparent text-ink border border-line hover:text-white"
               }`}
             >
               Table
             </button>
             <button
               onClick={() => setAssetView("card")}
-              className={`font-mono text-[11px] uppercase tracking-tag px-3 hover:!text-white py-1.5 rounded-sm ${
+              className={`font-mono text-[11px] uppercase tracking-tag px-3 py-1.5 rounded-sm ${
                 assetView === "card"
                   ? "bg-brand text-white"
-                  : "bg-transparent text-ink border border-line"
+                  : "bg-transparent text-ink border border-line hover:text-white"
               }`}
             >
               Card
@@ -422,7 +423,7 @@ const OverviewTab = ({
 
                           <button
                             onClick={() => generateAssetPoster(asset)}
-                            className="bg-success hover:!bg-[#23613d] text-white font-mono text-[10px] px-0.5 py-0.5 rounded-sm"
+                            className="min-w-[60px] bg-success hover:!bg-[#23613d] text-white font-mono text-[10px] px-0.5 py-0.5 rounded-sm"
                           >
                             Poster 🡇
                           </button>

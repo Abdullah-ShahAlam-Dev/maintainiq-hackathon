@@ -125,7 +125,7 @@ const getIssues = async (req, res) => {
     if (reporterEmail) query['reporterInfo.email'] = reporterEmail.toLowerCase().trim();
 
 const issues = await Issue.find(query)
-  .populate('assetId', 'assetCode name location category qrUrl')
+  .populate('assetId', 'assetCode name location category qrUrl imageUrl')
   .populate('assignedTechnician', 'name email')
   .sort({ createdAt: -1 });
 

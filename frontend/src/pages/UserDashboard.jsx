@@ -79,13 +79,13 @@ const AssetsTab = () => {
         <div className="flex gap-2">
           <button
             onClick={() => setView("card")}
-            className={`font-mono text-[11px] uppercase tracking-tag px-3 py-1.5 rounded-sm ${view === "card" ? "bg-brand text-white" : "bg-transparent text-ink border border-line"}`}
+            className={`font-mono text-[11px] uppercase tracking-tag px-3 py-1.5 rounded-sm ${view === "card" ? "bg-brand text-white" : "bg-transparent text-ink border border-line hover:text-white"}`}
           >
             Card
           </button>
           <button
             onClick={() => setView("table")}
-            className={`font-mono text-[11px] uppercase tracking-tag px-3 py-1.5 rounded-sm ${view === "table" ? "bg-brand text-white" : "bg-transparent text-ink border border-line"}`}
+            className={`font-mono text-[11px] uppercase tracking-tag px-3 py-1.5 rounded-sm ${view === "table" ? "bg-brand text-white" : "bg-transparent text-ink border border-line hover:text-white"}`}
           >
             Table
           </button>
@@ -208,7 +208,7 @@ const AssetsTab = () => {
                     View
                   </th>
                   <th className="text-left px-4 py-2.5 font-mono text-[10px] uppercase tracking-tag">
-                    Poster
+                    Download
                   </th>
                 </tr>
               </thead>
@@ -245,7 +245,7 @@ const AssetsTab = () => {
                         onClick={() => generateAssetPoster(asset)}
                         className="bg-success hover:!bg-[#23613d] text-white font-mono text-[10px] px-2.5 py-1 rounded-sm"
                       >
-                        Download🡇
+                        POSTER🡇
                       </button>
                     </td>
                   </tr>
@@ -357,34 +357,48 @@ const UserDashboard = () => {
   return (
     <div className="min-h-screen bg-base font-sans text-ink">
       <header className="bg-ink text-white border-b-[5px] border-hazard">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="font-mono text-sm uppercase tracking-tag m-0">
-            MaintainIQ / My Account
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <h1 className="font-mono text-base uppercase tracking-tag m-0">
+              <Link
+              to="/"
+              className="text-inherit no-underline hover:opacity-90 transition"
+            >
+              MaintainIQ
+            </Link>
+            {" "}
+            <span
+              className="text-hazard font-sans font-black inline-block mx-1"
+              style={{ WebkitTextStroke: "3px" }}
+            >
+              /
+            </span>{" "}
+            Registered-User
           </h1>
-          <div className="flex items-center gap-4 font-mono text-sm">
-            <span>USER {user?.name}</span>
+          <div className="flex items-center gap-4 font-mono uppercase text-sm tracking-tag font-semibold">
+            <span>{user?.name}</span>
             <button
               onClick={() => {
                 logout();
                 navigate("/login");
               }}
-              className="bg-transparent border border-white/30 hover:bg-white/10 text-white font-mono text-xs uppercase tracking-tag px-3 py-1.5 rounded-sm"
+              className="bg-brand border border-white/30 hover:bg-white/10 text-white font-mono text-xs uppercase tracking-tag px-6 py-3 rounded-sm"
             >
               Logout
             </button>
           </div>
         </div>
 
-        <nav className="max-w-4xl mx-auto px-6 flex gap-1">
+        <nav className="max-w-6xl mx-auto px-6 flex gap-1">
           {TABS.map((tab) => {
             const isActive = activeTab === tab.key;
             return (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`group relative whitespace-nowrap font-mono text-xs uppercase tracking-tag px-5 py-3 rounded-t-sm border border-b-0 transition-colors ${
+                // exclude group class for removal of dot hover
+                className={`relative whitespace-nowrap font-mono text-xs uppercase tracking-tag px-5 py-3 rounded-t-sm border border-b-0 transition-colors ${
                   isActive
-                    ? "bg-base text-ink border-line"
+                    ? "bg-base text-ink border-line hover:text-white"
                     : "bg-transparent text-white/60 border-transparent hover:text-white"
                 }`}
               >
@@ -401,7 +415,7 @@ const UserDashboard = () => {
         </nav>
       </header>
 
-      <main className="max-w-4xl mx-auto px-6 py-8">
+      <main className="max-w-6xl mx-auto px-6 py-8">
         {activeTab === "assets" && <AssetsTab />}
         {activeTab === "issues" && <MyIssuesTab user={user} />}
       </main>
