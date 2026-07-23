@@ -361,7 +361,25 @@ const updateUserStatus = async (req, res) => {
     console.log(target.email);
     if (status === "revoked") {
       await sendRevokedEmail(target.email, target.name, target.role);
-    }//closing email
+    }
+
+
+
+    // if (["admin", "technician"].includes(target.role)) {
+    //   if (status === "approved") {
+    //     await sendAccessGrantedEmail(target.email, target.name, target.role);
+    //   }
+    // }
+
+    // if (["admin", "technician"].includes(target.role)) {
+    //   console.log("===== REVOKING USER =====");
+    //   console.log(target.email);
+    //   if (status === "revoked") {
+    //     await sendRevokedEmail(target.email, target.name, target.role);
+    //   }
+    // } 
+
+    //closing email
 
     res.json({
       id: target._id,
