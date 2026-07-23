@@ -36,7 +36,7 @@ The QR code is only the entry point — the real product value is in role-based 
 ### Admin Dashboard (role-aware, 6 tabs)
 - **Overview** — asset registry (card/table toggle, category/status filters, sort, search), asset creation, edit, and delete (delete restricted to Super Admin, enforced server-side)
 - **Approvals** — pending technician/admin signups; Super Admin sees both, Admin sees technicians only; certification documents viewable inline
-- **Issue Management** — card/table toggle, category/status/sort filters, technician assignment (approved technicians only), full **Issue History Report** PDF export (reporter info, asset snapshot, assignment trail, timeline, maintenance notes)
+- **Issue Management** — card/table toggle, category/status/sort filters, technician assignment (approved technicians only), full **Issue History Report** PDF export (reporter info, asset snapshot + photo, assignment trail, timeline, maintenance notes)
 - **Administrators / Technicians / Users** — management tables with a Granted/Revoked toggle and a Delete action that's disabled until an account is revoked (enforced server-side, not just the UI)
 
 ### Asset Management
