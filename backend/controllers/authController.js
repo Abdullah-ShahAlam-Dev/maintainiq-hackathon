@@ -66,12 +66,10 @@ const register = async (req, res) => {
         .json({ message: "Specialty is required for technician signup" });
     }
     if (finalRole === "technician" && !req.file) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Certification/evidence document is required for technician signup",
-        });
+      return res.status(400).json({
+        message:
+          "Certification/evidence document is required for technician signup",
+      });
     }
 
     const existing = await User.findOne({ email: cleanEmail });
@@ -114,13 +112,10 @@ const register = async (req, res) => {
 
     await sendOtpEmail(cleanEmail, otp, "account verification");
 
-
-    res
-      .status(200)
-      .json({
-        message: "OTP sent to your email. Verify to complete signup.",
-        email: cleanEmail,
-      });
+    res.status(200).json({
+      message: "OTP sent to your email. Verify to complete signup.",
+      email: cleanEmail,
+    });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
@@ -155,16 +150,15 @@ const verifySignupOtp = async (req, res) => {
     user.otpExpiry = null;
     await user.save();
 
-
-        //adding Emails Features calls from here
-    if (finalRole === "user") {
-      await sendWelcomeEmail(cleanEmail, name);
+    //adding Emails Features calls from here
+    if (user.role === "user") {
+      await sendWelcomeEmail(user.email, user.name);
     }
 
-    if (["admin", "technician"].includes(finalRole)) {
-      await sendPendingEmail(cleanEmail, name, finalRole);
+    if (["admin", "technician"].includes(user.role)) {
+      await sendPendingEmail(user.email, user.name, user.role);
     }
-
+    //close email
 
     if (user.status === "approved") {
       const token = generateToken(user);
@@ -226,11 +220,9 @@ const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
 
     if (!user.isVerified) {
-      return res
-        .status(403)
-        .json({
-          message: "Please verify your email via OTP before logging in",
-        });
+      return res.status(403).json({
+        message: "Please verify your email via OTP before logging in",
+      });
     }
     if (user.status === "pending") {
       return res
@@ -238,11 +230,9 @@ const login = async (req, res) => {
         .json({ message: "Your account is awaiting admin approval" });
     }
     if (user.status === "revoked") {
-      return res
-        .status(403)
-        .json({
-          message: "Your access has been revoked. Contact an administrator.",
-        });
+      return res.status(403).json({
+        message: "Your access has been revoked. Contact an administrator.",
+      });
     }
 
     const token = generateToken(user);
@@ -311,11 +301,9 @@ const getManagementList = async (req, res) => {
   try {
     const { role } = req.query;
     if (!role || !["admin", "technician", "user"].includes(role)) {
-      return res
-        .status(400)
-        .json({
-          message: 'role query param must be "admin", "technician" or "user"',
-        });
+      return res.status(400).json({
+        message: 'role query param must be "admin", "technician" or "user"',
+      });
     }
     if (role === "admin" && req.user.role !== "superadmin") {
       return res.status(403).json({ message: "Access denied" });
@@ -362,7 +350,7 @@ const updateUserStatus = async (req, res) => {
     await target.save();
     // after saving in Db then sending these emails
 
-    // SENDING EMIAL SECTIONS AFTER STATUS CHNAGED 
+    // SENDING EMIAL SECTIONS AFTER STATUS CHNAGED
     console.log("===== APPROVING USER =====");
     console.log(target.email);
     if (status === "approved") {
@@ -373,7 +361,7 @@ const updateUserStatus = async (req, res) => {
     console.log(target.email);
     if (status === "revoked") {
       await sendRevokedEmail(target.email, target.name, target.role);
-    }
+    }//closing email
 
     res.json({
       id: target._id,
