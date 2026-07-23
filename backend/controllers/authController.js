@@ -5,12 +5,19 @@ const cloudinary = require('../config/cloudinary');
 const generateOtp = require('../utils/generateOtp');
 const { sendOtpEmail } = require('../utils/sendEmail');
 
-const SIGNUP_OTP_TTL_MS = 10 * 60 * 500; // 5 minutes
+const SIGNUP_OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes onverting from Miliseocnd
 
+// secure+sameSite:'none' is REQUIRED in production (frontend/backend on
+// different HTTPS domains — Vercel/Render) but BREAKS on local HTTP testing,
+// since browsers refuse to set/send secure cookies over a plain http://
+// connection. Render sets NODE_ENV=production automatically; locally it's
+// unset, so this switches correctly without you touching anything.
+const isProd = process.env.NODE_ENV === 'production';
+// Local me NODE_ENV aksar undefined hota hai unless manually set. — yehi cheez isProd ko false bana deti hai, jo local testing ke liye zaroori hai
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: true, // required for cross-site cookies (frontend/backend on different domains)
-  sameSite: 'none',
+  secure: isProd,   // required true for cross-site cookies (frontend/backend on different domains) like vercel+render
+  sameSite: isProd ? 'none' : 'lax', // "lax" for local HTTP; "none" + secure for production (cross-site HTTPS)
   maxAge: 1 * 24 * 60 * 60 * 1000
 };
 
