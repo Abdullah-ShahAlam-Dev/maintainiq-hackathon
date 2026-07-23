@@ -114,14 +114,6 @@ const register = async (req, res) => {
 
     await sendOtpEmail(cleanEmail, otp, "account verification");
 
-    //adding Emails Features calls from here
-    if (finalRole === "user") {
-      await sendWelcomeEmail(cleanEmail, name);
-    }
-
-    if (["admin", "technician"].includes(finalRole)) {
-      await sendPendingEmail(cleanEmail, name, finalRole);
-    }
 
     res
       .status(200)
@@ -162,6 +154,17 @@ const verifySignupOtp = async (req, res) => {
     user.otp = null;
     user.otpExpiry = null;
     await user.save();
+
+
+        //adding Emails Features calls from here
+    if (finalRole === "user") {
+      await sendWelcomeEmail(cleanEmail, name);
+    }
+
+    if (["admin", "technician"].includes(finalRole)) {
+      await sendPendingEmail(cleanEmail, name, finalRole);
+    }
+
 
     if (user.status === "approved") {
       const token = generateToken(user);
