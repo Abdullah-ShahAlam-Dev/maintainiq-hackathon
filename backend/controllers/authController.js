@@ -4,6 +4,8 @@ const User = require('../models/User');
 const cloudinary = require('../config/cloudinary');
 const generateOtp = require('../utils/generateOtp');
 const { sendOtpEmail } = require('../utils/sendEmail');
+const { sendAccessGrantedEmail } = require("../utils/sendAccessEmail");
+
 
 const SIGNUP_OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes onverting from Miliseocnd
 
@@ -275,6 +277,19 @@ const updateUserStatus = async (req, res) => {
     target.status = status;
     target.approvedBy = actor?.name || req.user.name || 'Unknown';
     await target.save();
+
+
+    console.log("===== APPROVING USER =====");
+    console.log(target.email);
+
+if (status === "approved") {
+  await sendAccessGrantedEmail(
+    target.email,
+    target.name,
+    target.role
+  );
+}
+
 
     res.json({
       id: target._id,
