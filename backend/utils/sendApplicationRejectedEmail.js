@@ -20,7 +20,7 @@ const sendApplicationRejectedEmail = async (mail, name, role) => {
     subject: "Application Status Update - MaintainIQ",
     html: `
       <div style="font-family: Arial, sans-serif; max-width:600px; margin:auto; padding:20px; border:1px solid #eee; border-radius:8px;">
-        <h2 style="color:#d32f2f;">Application Update</h2>
+        <h2 style="color:#d32f2f;">Application Status Update</h2>
 
         <p>Dear <strong>${name}</strong>,</p>
 
