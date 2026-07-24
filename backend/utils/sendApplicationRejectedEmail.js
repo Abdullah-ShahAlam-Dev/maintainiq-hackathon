@@ -16,7 +16,7 @@ const sendApplicationRejectedEmail = async (mail, name, role) => {
 
   const msg = {
     to: mail,
-    from: process.env.SENDER_EMAIL,
+    from: process.env.SENDGRID_FROM_EMAIL,
     subject: "Application Status Update - MaintainIQ",
     html: `
       <div style="font-family: Arial, sans-serif; max-width:600px; margin:auto; padding:20px; border:1px solid #eee; border-radius:8px;">

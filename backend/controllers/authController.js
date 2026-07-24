@@ -367,21 +367,7 @@ const updateUserStatus = async (req, res) => {
 
     if (status === "revoked") {
       if (previousStatus === "pending") {
-        // await sendApplicationRejectedEmail(target.email,target.name,target.role,);
-try {
-  await sendApplicationRejectedEmail(
-    target.email,
-    target.name,
-    target.role
-  );
-} catch (err) {
-   console.error("Rejected email failed:");
-  console.error(err.response.body.errors);
-  throw err;
-}
-
-
-
+        await sendApplicationRejectedEmail(target.email,target.name,target.role,);
       }
 
       else if (previousStatus === "approved") {
