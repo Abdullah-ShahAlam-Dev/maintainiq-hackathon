@@ -375,7 +375,8 @@ try {
     target.role
   );
 } catch (err) {
-  console.error("Rejected email failed:", err);
+   console.error("Rejected email failed:");
+  console.error(err.response.body.errors);
   throw err;
 }
 
