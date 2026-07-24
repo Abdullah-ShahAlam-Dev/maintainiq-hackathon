@@ -8,6 +8,9 @@ const { sendAccessGrantedEmail } = require("../utils/sendAccessEmail");
 const { sendWelcomeEmail } = require("../utils/sendWelcomeEmail");
 const { sendPendingEmail } = require("../utils/sendPendingEmail");
 const { sendRevokedEmail } = require("../utils/sendRevokedEmail");
+const {
+  sendApplicationRejectedEmail,
+} = require("../utils/sendApplicationRejectedEmail");
 
 const SIGNUP_OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes onverting from Miliseocnd
 
@@ -345,13 +348,15 @@ const updateUserStatus = async (req, res) => {
 
     const actor = await User.findById(req.user.id).select("name");
 
+    const previousStatus = target.status;
+
     target.status = status;
     target.approvedBy = actor?.name || req.user.name || "Unknown";
     await target.save();
     // after saving in Db then sending these emails
 
     // SENDING EMIAL SECTIONS AFTER STATUS CHNAGED
-    console.log("===== APPROVING USER =====");
+    console.log("===== checking status USER =====");
     console.log(target.email);
     if (status === "approved") {
       await sendAccessGrantedEmail(target.email, target.name, target.role);
@@ -359,25 +364,37 @@ const updateUserStatus = async (req, res) => {
 
     console.log("===== REVOKING USER =====");
     console.log(target.email);
+
     if (status === "revoked") {
-      await sendRevokedEmail(target.email, target.name, target.role);
+      if (previousStatus === "pending") {
+        await sendApplicationRejectedEmail(target.email,target.name,target.role,);
+      }
+
+      else if (previousStatus === "approved") {
+        await sendRevokedEmail(target.email, target.name, target.role);
+      }
     }
 
 
-
+// if we want to off th efeature for users
     // if (["admin", "technician"].includes(target.role)) {
     //   if (status === "approved") {
     //     await sendAccessGrantedEmail(target.email, target.name, target.role);
     //   }
     // }
+    // if (status === "revoked") {
+    //   if (previousStatus === "pending") {
+    //     await sendApplicationRejectedEmail(target.email,target.name,target.role,);
+    //   }
 
+    //   else if (previousStatus === "approved") {
+    //     await sendRevokedEmail(target.email, target.name, target.role);
+    //   }
+    // }
     // if (["admin", "technician"].includes(target.role)) {
     //   console.log("===== REVOKING USER =====");
     //   console.log(target.email);
-    //   if (status === "revoked") {
-    //     await sendRevokedEmail(target.email, target.name, target.role);
-    //   }
-    // } 
+    // }
 
     //closing email
 
