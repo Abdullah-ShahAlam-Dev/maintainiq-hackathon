@@ -517,10 +517,10 @@ const IssueManagementTab = ({ issues, technicians, onAssign }) => {
                     </td>
                     <td className="px-4 py-2.5 text-sm">
                       {issue.status}
-                      {!issue.assetId && (
-                        <span className="ml-2 text-[9px] font-mono font-bold uppercase tracking-tag text-critical">
+                      {!issue.assetId &&  (
+                        <div className="whitespace-nowrap text-[9px] font-mono font-bold uppercase tracking-tag text-critical">
                           (Asset Removed)
-                        </span>
+                        </div>
                       )}
                     </td>
                     <td className="px-4 py-2.5 text-sm">
