@@ -4,13 +4,14 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const ROLE_LABELS = {
   admin: "Administrator",
-  technician: "Technician"
+  technician: "Technician",
 };
 
 const sendPendingEmail = async (mail, name, role) => {
   console.log("===== PENDING EMAIL FUNCTION CALLED =====");
 
   const displayRole = ROLE_LABELS[role] || role;
+  const article = role === "admin" ? "an" : "a"; //role internal avable hi so uses local scope
 
   const technicianSection =
     role === "technician"
@@ -28,7 +29,7 @@ const sendPendingEmail = async (mail, name, role) => {
     html: `
       <h2>Welcome, ${name}! 👋</h2>
 
-      <p>Thank you for applying as a <strong>${displayRole}</strong>.</p>
+      <p>Thank you for applying as ${article} <strong>${displayRole}</strong>.</p>
 
       ${technicianSection}
 
@@ -41,7 +42,7 @@ const sendPendingEmail = async (mail, name, role) => {
       <p>Thank you for choosing <strong>MaintainIQ</strong>.</p>
 
       <p><strong>MaintainIQ Team</strong></p>
-    `
+    `,
   };
 
   try {
@@ -50,14 +51,14 @@ const sendPendingEmail = async (mail, name, role) => {
     const [response] = await sgMail.send(msg);
 
     console.log(
-      `[SendGrid] Pending email sent to ${mail} — ${response.statusCode}`
+      `[SendGrid] Pending email sent to ${mail} — ${response.statusCode}`,
     );
 
     return response;
   } catch (err) {
     console.error(
       `[SendGrid] FAILED to send Pending email to ${mail}:`,
-      err.response?.body || err.message
+      err.response?.body || err.message,
     );
   }
 };
