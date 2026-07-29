@@ -182,9 +182,3 @@ npm run dev
 - Issue History Report PDF export is Admin-only (not surfaced to Technician/User dashboards)
 - "My Reported Issues" has no search/filter yet
 - Asset deletion is permanent (no soft-delete/restore)
-
----
-
-## AI Usage Disclosure
-
-AI assistance (Claude) was used extensively throughout development — initial scaffolding, the RBAC/OTP/cookie-auth architecture redesign, debugging (SMTP deliverability, deployment/DNS issues, race conditions), and structuring the AI Issue Triage prompt. All architecture decisions, business logic, and final implementation were reviewed, tested, and understood by the developer.
