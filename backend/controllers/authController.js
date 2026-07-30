@@ -25,7 +25,7 @@ const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: isProd, // required true for cross-site cookies (frontend/backend on different domains) like vercel+render
   sameSite: isProd ? "none" : "lax", // "lax" for local HTTP; "none" + secure for production (cross-site HTTPS)
-  maxAge: 1 * 24 * 60 * 60 * 1000,
+  maxAge: 1 * 24 * 60 * 60 * 1000, // tell to cookie ki browser ko ye cookie 1 din ke liye valid rakhna hai, uske baad expire ho jayegi
 };
 
 const generateToken = (user) =>
