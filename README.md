@@ -180,5 +180,4 @@ npm run dev
 
 - No automated test suite
 - Issue History Report PDF export is Admin-only (not surfaced to Technician/User dashboards)
-- "My Reported Issues" has no search/filter yet
 - Asset deletion is permanent (no soft-delete/restore)
