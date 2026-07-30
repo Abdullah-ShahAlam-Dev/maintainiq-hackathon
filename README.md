@@ -179,5 +179,5 @@ npm run dev
 ## Known Limitations
 
 - No automated test suite
-- Issue History Report PDF export is Admin-only (not surfaced to Technician/User dashboards)
+<!-- - Issue History Report PDF export is Admin-only (not surfaced to Technician/User dashboards) -->
 - Asset deletion is permanent (no soft-delete/restore)
